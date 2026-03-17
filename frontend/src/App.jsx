@@ -10,6 +10,7 @@ import ProfilePage from './pages/ProfilePage';
 import LikesYouPage from './pages/LikesYouPage';
 import PremiumPage from './pages/PremiumPage';
 import PremiumProPage from './pages/PremiumProPage';
+import CheckoutPage from './pages/CheckoutPage';
 
 export default function App() {
   return (
@@ -63,7 +64,6 @@ export default function App() {
         }
       />
 
-      {/* Premium */}
       <Route
         path="/premium"
         element={
@@ -73,12 +73,20 @@ export default function App() {
         }
       />
 
-      {/* 👇 ADD THIS (missing earlier) */}
       <Route
         path="/premium-pro"
         element={
           <ProtectedRoute>
             <PremiumProPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/checkout/:plan"
+        element={
+          <ProtectedRoute>
+            <CheckoutPage />
           </ProtectedRoute>
         }
       />
