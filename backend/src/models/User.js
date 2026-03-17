@@ -46,6 +46,8 @@ const userSchema = new mongoose.Schema(
 
     likesSent: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     likesReceived: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    likesTodayCount: { type: Number, default: 0 },
+    likesResetAt: { type: Date },
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Match' }],
     lastActiveAt: { type: Date, default: Date.now }
   },
