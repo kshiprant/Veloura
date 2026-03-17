@@ -7,6 +7,7 @@ import SignUpPage from './pages/SignUpPage';
 import DiscoverPage from './pages/DiscoverPage';
 import MatchesPage from './pages/MatchesPage';
 import ProfilePage from './pages/ProfilePage';
+import LikesYouPage from './pages/LikesYouPage';
 
 export default function App() {
   return (
@@ -14,10 +15,46 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-      <Route path="/discover" element={<ProtectedRoute><DiscoverPage /></ProtectedRoute>} />
-      <Route path="/matches" element={<ProtectedRoute><MatchesPage /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <OnboardingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/discover"
+        element={
+          <ProtectedRoute>
+            <DiscoverPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/matches"
+        element={
+          <ProtectedRoute>
+            <MatchesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/likes-you"
+        element={
+          <ProtectedRoute>
+            <LikesYouPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
