@@ -1,17 +1,20 @@
 import { useState } from "react";
-import api from "../api/client"; // ✅ use shared client
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      const res = await api.post("/auth/login", { email, password });
 
-      localStorage.setItem("veloura_token", res.data.token);
+    try {
+      await login({ email, password });
       alert("Login successful");
+      navigate("/discover");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }
@@ -26,14 +29,18 @@ export default function SignInPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-        /><br /><br />
+        />
+        <br />
+        <br />
 
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-        /><br /><br />
+        />
+        <br />
+        <br />
 
         <button type="submit">Login</button>
       </form>
