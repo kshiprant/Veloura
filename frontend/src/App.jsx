@@ -11,6 +11,8 @@ import LikesYouPage from './pages/LikesYouPage';
 import PremiumPage from './pages/PremiumPage';
 import PremiumProPage from './pages/PremiumProPage';
 import CheckoutPage from './pages/CheckoutPage';
+import NotificationsPage from './pages/NotificationsPage';
+import PrivacySafetyPage from './pages/PrivacySafetyPage';
 
 export default function App() {
   return (
@@ -87,6 +89,24 @@ export default function App() {
         element={
           <ProtectedRoute>
             <CheckoutPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/settings/notifications"
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/settings/privacy-safety"
+        element={
+          <ProtectedRoute>
+            <PrivacySafetyPage />
           </ProtectedRoute>
         }
       />
