@@ -725,3 +725,28 @@ p { line-height: 1.6; }
     grid-column:auto;
   }
 }
+.onboarding-photo-card{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.onboarding-photo-preview-wrap{
+  width:100%;
+  border-radius:28px;
+  overflow:hidden;
+  background:#f3f4f6;
+  border:1px solid rgba(15,23,42,.08);
+}
+
+.onboarding-photo-preview{
+  width:100%;
+  aspect-ratio:4 / 5;
+  object-fit:cover;
+  display:block;
+}
+
+.onboarding-upload-button{
+  width:100%;
+  justify-content:center;
+}
