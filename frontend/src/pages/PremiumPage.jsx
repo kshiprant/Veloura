@@ -44,7 +44,10 @@ export default function PremiumPage() {
               {isPro ? 'You already have Premium Pro' : 'You already have Premium'}
             </button>
           ) : (
-            <button className="button primary top24">
+            <button
+              className="button primary top24"
+              onClick={() => navigate('/checkout/premium')}
+            >
               Continue to Payment
             </button>
           )}
