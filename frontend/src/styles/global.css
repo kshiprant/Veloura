@@ -1264,3 +1264,8 @@ p { line-height: 1.6; }
   font-size:13px;
   color:#5f4b52;
 }
+.settings-row input[type="checkbox"]{
+  width:20px;
+  height:20px;
+  accent-color:#8a1538;
+}
