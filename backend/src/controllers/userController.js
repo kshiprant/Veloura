@@ -15,7 +15,8 @@ export async function saveOnboarding(req, res) {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     }
 
-    const completed = Boolean(updates.firstName || req.user.firstName) &&
+    const completed =
+      Boolean(updates.firstName || req.user.firstName) &&
       Boolean(updates.age || req.user.age) &&
       Boolean(updates.gender || req.user.gender) &&
       Boolean(updates.city || req.user.city);
@@ -24,7 +25,7 @@ export async function saveOnboarding(req, res) {
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
-      runValidators: true
+      runValidators: true,
     }).select('-password');
 
     return res.json(user);
@@ -38,13 +39,14 @@ export async function updateProfile(req, res) {
   try {
     const fields = ['firstName', 'age', 'gender', 'city', 'bio', 'photos', 'interests', 'prompts', 'intention'];
     const updates = {};
+
     for (const field of fields) {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
     }
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
-      runValidators: true
+      runValidators: true,
     }).select('-password');
 
     return res.json(user);
@@ -58,6 +60,7 @@ export async function getDiscovery(req, res) {
   try {
     const currentUser = await User.findById(req.user._id).select('likesSent');
     const matches = await Match.find({ users: req.user._id }).select('users');
+
     const matchedUserIds = matches
       .flatMap((m) => m.users)
       .filter((id) => String(id) !== String(req.user._id));
@@ -66,7 +69,7 @@ export async function getDiscovery(req, res) {
 
     const users = await User.find({
       _id: { $nin: excludeIds },
-      onboardingCompleted: true
+      onboardingCompleted: true,
     })
       .select('-password -likesSent -likesReceived -matches')
       .sort({ lastActiveAt: -1 })
@@ -82,6 +85,7 @@ export async function getDiscovery(req, res) {
 export async function likeUser(req, res) {
   try {
     const { targetUserId } = req.params;
+
     if (String(targetUserId) === String(req.user._id)) {
       return res.status(400).json({ message: 'Cannot like yourself' });
     }
@@ -93,7 +97,10 @@ export async function likeUser(req, res) {
       return res.status(404).json({ message: 'Profile not found' });
     }
 
-    const alreadyMatched = await Match.findOne({ users: { $all: [user._id, target._id] } });
+    const alreadyMatched = await Match.findOne({
+      users: { $all: [user._id, target._id] },
+    });
+
     if (alreadyMatched) {
       return res.json({ matched: true, matchId: alreadyMatched._id });
     }
@@ -114,7 +121,7 @@ export async function likeUser(req, res) {
     if (mutual) {
       const match = await Match.create({
         users: [user._id, target._id],
-        createdBy: user._id
+        createdBy: user._id,
       });
 
       user.matches.push(match._id);
@@ -126,7 +133,7 @@ export async function likeUser(req, res) {
       return res.json({
         matched: true,
         matchId: match._id,
-        message: "It's a match!"
+        message: "It's a match!",
       });
     }
 
@@ -142,13 +149,13 @@ export async function getMyMatches(req, res) {
     const matches = await Match.find({ users: req.user._id })
       .populate({
         path: 'users',
-        select: 'firstName age city photos bio interests intention lastActiveAt'
+        select: 'firstName age city photos bio interests intention lastActiveAt',
       })
       .sort({ lastMessageAt: -1, createdAt: -1 });
 
     const formatted = matches.map((match) => ({
       ...match.toObject(),
-      otherUser: match.users.find((u) => String(u._id) !== String(req.user._id))
+      otherUser: match.users.find((u) => String(u._id) !== String(req.user._id)),
     }));
 
     return res.json(formatted);
@@ -161,10 +168,20 @@ export async function getMyMatches(req, res) {
 export async function getLikesReceived(req, res) {
   try {
     const currentUser = await User.findById(req.user._id).select('likesReceived');
+    const matches = await Match.find({ users: req.user._id }).select('users');
+
+    const matchedUserIds = matches
+      .flatMap((m) => m.users)
+      .filter((id) => String(id) !== String(req.user._id))
+      .map((id) => String(id));
+
+    const filteredIds = currentUser.likesReceived.filter(
+      (id) => !matchedUserIds.includes(String(id))
+    );
 
     const users = await User.find({
-      _id: { $in: currentUser.likesReceived },
-      onboardingCompleted: true
+      _id: { $in: filteredIds },
+      onboardingCompleted: true,
     })
       .select('firstName age city photos bio interests intention lastActiveAt')
       .sort({ lastActiveAt: -1 });
