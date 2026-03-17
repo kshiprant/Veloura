@@ -311,84 +311,86 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <div className="settings-sheet">
-              <div className="settings-group">
-                <div className="settings-label">Account</div>
+            <div className="sf-drawer-scroll">
+              <div className="settings-sheet">
+                <div className="settings-group">
+                  <div className="settings-label">Account</div>
 
-                <button
-                  className="settings-row"
-                  onClick={() => {
-                    setSettingsOpen(false);
-                    setEditOpen(true);
-                  }}
-                >
-                  <span>Edit Profile</span>
-                  <span className="settings-arrow">›</span>
-                </button>
+                  <button
+                    className="settings-row"
+                    onClick={() => {
+                      setSettingsOpen(false);
+                      setEditOpen(true);
+                    }}
+                  >
+                    <span>Edit Profile</span>
+                    <span className="settings-arrow">›</span>
+                  </button>
 
-                <button className="settings-row">
-                  <span>Notifications</span>
-                  <span className="settings-arrow">›</span>
-                </button>
+                  <button className="settings-row">
+                    <span>Notifications</span>
+                    <span className="settings-arrow">›</span>
+                  </button>
 
-                <button className="settings-row">
-                  <span>Privacy &amp; Safety</span>
-                  <span className="settings-arrow">›</span>
-                </button>
-              </div>
-
-              <div className="settings-group premium-group">
-                <div className="settings-label">Subscription</div>
-
-                <div className="premium-card">
-                  <div className="premium-card-top">
-                    <h4>Get Premium</h4>
-                    <span className="premium-badge">Popular</span>
-                  </div>
-
-                  <p className="muted">
-                    Unlock more visibility, advanced filters, and stronger matching features.
-                  </p>
-
-                  <button className="button primary premium-cta">
-                    Upgrade to Premium
+                  <button className="settings-row">
+                    <span>Privacy &amp; Safety</span>
+                    <span className="settings-arrow">›</span>
                   </button>
                 </div>
 
-                <div className="premium-card premium-card-pro">
-                  <div className="premium-card-top">
-                    <h4>Premium Pro Pack</h4>
-                    <span className="premium-badge premium-badge-dark">Pro</span>
+                <div className="settings-group premium-group">
+                  <div className="settings-label">Subscription</div>
+
+                  <div className="premium-card">
+                    <div className="premium-card-top">
+                      <h4>Get Premium</h4>
+                      <span className="premium-badge">Popular</span>
+                    </div>
+
+                    <p className="muted">
+                      Unlock more visibility, advanced filters, and stronger matching features.
+                    </p>
+
+                    <button className="button primary premium-cta">
+                      Upgrade to Premium
+                    </button>
                   </div>
 
-                  <p className="muted">
-                    Priority placement, better reach, premium boosts, and elite profile advantages.
-                  </p>
+                  <div className="premium-card premium-card-pro">
+                    <div className="premium-card-top">
+                      <h4>Premium Pro Pack</h4>
+                      <span className="premium-badge premium-badge-dark">Pro</span>
+                    </div>
 
-                  <button className="button primary premium-cta">
-                    Get Pro Pack
+                    <p className="muted">
+                      Priority placement, better reach, premium boosts, and elite profile advantages.
+                    </p>
+
+                    <button className="button primary premium-cta">
+                      Get Pro Pack
+                    </button>
+                  </div>
+                </div>
+
+                <div className="settings-group">
+                  <div className="settings-label">Danger Zone</div>
+                  <button
+                    className="settings-row settings-row-danger"
+                    onClick={handleDeleteProfile}
+                    disabled={deleting}
+                  >
+                    <span>{deleting ? 'Deleting...' : 'Delete Profile'}</span>
+                    <span className="settings-arrow">›</span>
                   </button>
                 </div>
-              </div>
 
-              <div className="settings-group">
-                <div className="settings-label">Danger Zone</div>
-                <button
-                  className="settings-row settings-row-danger"
-                  onClick={handleDeleteProfile}
-                  disabled={deleting}
-                >
-                  <span>{deleting ? 'Deleting...' : 'Delete Profile'}</span>
-                  <span className="settings-arrow">›</span>
-                </button>
-              </div>
-
-              <div className="settings-group">
-                <div className="settings-label">Session</div>
-                <button className="settings-row" onClick={logout}>
-                  <span>Logout</span>
-                  <span className="settings-arrow">›</span>
-                </button>
+                <div className="settings-group">
+                  <div className="settings-label">Session</div>
+                  <button className="settings-row" onClick={logout}>
+                    <span>Logout</span>
+                    <span className="settings-arrow">›</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -396,4 +398,4 @@ export default function ProfilePage() {
       ) : null}
     </AppShell>
   );
-                }
+}
