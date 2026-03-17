@@ -201,8 +201,11 @@ export async function uploadProfilePhoto(req, res) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const photoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    const publicBaseUrl =
+      process.env.PUBLIC_BACKEND_URL ||
+      `${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}`;
+
+    const photoUrl = `${publicBaseUrl}/uploads/${req.file.filename}`;
 
     const user = await User.findById(req.user._id);
 
@@ -259,4 +262,4 @@ export async function deleteProfile(req, res) {
     console.error('delete profile error', error);
     return res.status(500).json({ message: 'Could not delete profile' });
   }
-}
+          }
