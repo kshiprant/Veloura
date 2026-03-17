@@ -750,3 +750,136 @@ p { line-height: 1.6; }
   width:100%;
   justify-content:center;
 }
+.settings-sheet{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  padding-top:8px;
+}
+
+.settings-group{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.settings-label{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.04em;
+  color:#6b7280;
+  text-transform:uppercase;
+  margin-bottom:2px;
+}
+
+.settings-row{
+  width:100%;
+  border:none;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(138,21,56,.10);
+  border-radius:20px;
+  min-height:60px;
+  padding:0 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  text-align:left;
+  color:#2a1d21;
+  box-shadow:0 8px 20px rgba(36,24,27,.05);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.settings-row:hover{
+  transform:translateY(-1px);
+  box-shadow:0 12px 24px rgba(36,24,27,.08);
+  border-color:rgba(138,21,56,.18);
+}
+
+.settings-arrow{
+  font-size:22px;
+  line-height:1;
+  color:#9b8c91;
+  flex-shrink:0;
+}
+
+.settings-row-danger{
+  color:#8a1538;
+  border-color:rgba(138,21,56,.18);
+}
+
+.premium-group{
+  gap:14px;
+}
+
+.premium-card{
+  border:1px solid rgba(128,0,64,.14);
+  border-radius:24px;
+  padding:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(251,245,247,1) 100%);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  box-shadow:0 10px 24px rgba(36,24,27,.05);
+}
+
+.premium-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.premium-card h4{
+  margin:0;
+  font-size:1.1rem;
+}
+
+.premium-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  color:#8a1538;
+  background:rgba(138,21,56,.08);
+}
+
+.premium-badge-dark{
+  background:rgba(39,29,29,.08);
+  color:#271d1d;
+}
+
+.premium-cta{
+  width:100%;
+  margin-top:4px;
+}
+
+.sf-drawer.profile-drawer{
+  padding:18px 18px 28px;
+}
+
+.sf-drawer-scroll{
+  overflow-y:auto;
+  padding-top:8px;
+  padding-bottom:4px;
+}
+
+@media (max-width: 640px){
+  .settings-sheet{
+    gap:20px;
+  }
+
+  .settings-row{
+    min-height:58px;
+    border-radius:18px;
+    padding:0 16px;
+  }
+
+  .premium-card{
+    padding:16px;
+    border-radius:22px;
+  }
+}
