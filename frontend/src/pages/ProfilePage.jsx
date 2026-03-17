@@ -1,37 +1,93 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AppShell from '../components/AppShell';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
+const placeholderImage = 'https://placehold.co/800x1000?text=Veloura';
+
 export default function ProfilePage() {
   const { user, setUser, logout } = useAuth();
-  const [editing, setEditing] = useState(false);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const [form, setForm] = useState({
-    firstName: user?.firstName || '',
-    age: user?.age || '',
-    city: user?.city || '',
-    bio: user?.bio || '',
-    intention: user?.intention || '',
-    interests: (user?.interests || []).join(', '),
-    photo: user?.photos?.[0] || ''
+    firstName: '',
+    age: '',
+    city: '',
+    bio: '',
+    intention: '',
+    interests: '',
   });
+
+  const [selectedPhotoFile, setSelectedPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState('');
+
+  useEffect(() => {
+    setForm({
+      firstName: user?.firstName || '',
+      age: user?.age || '',
+      city: user?.city || '',
+      bio: user?.bio || '',
+      intention: user?.intention || '',
+      interests: (user?.interests || []).join(', '),
+    });
+
+    setPhotoPreview(user?.photos?.[0] || '');
+    setSelectedPhotoFile(null);
+  }, [user, editOpen]);
+
+  useEffect(() => {
+    if (!selectedPhotoFile) return;
+
+    const previewUrl = URL.createObjectURL(selectedPhotoFile);
+    setPhotoPreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedPhotoFile]);
+
+  const displayImage = useMemo(() => {
+    return user?.photos?.[0] || placeholderImage;
+  }, [user]);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedPhotoFile(file);
+  };
+
+  const closeEdit = () => {
+    setEditOpen(false);
+    setSelectedPhotoFile(null);
+    setPhotoPreview(user?.photos?.[0] || '');
+  };
 
   const save = async () => {
     setSaving(true);
     try {
       const payload = {
-        firstName: form.firstName,
-        age: Number(form.age),
-        city: form.city,
-        bio: form.bio,
-        intention: form.intention,
-        interests: form.interests.split(',').map((v) => v.trim()).filter(Boolean),
-        photos: form.photo ? [form.photo] : []
+        firstName: form.firstName.trim(),
+        age: form.age ? Number(form.age) : null,
+        city: form.city.trim(),
+        bio: form.bio.trim(),
+        intention: form.intention.trim(),
+        interests: form.interests
+          .split(',')
+          .map((v) => v.trim())
+          .filter(Boolean),
+        // Temporary:
+        // This preserves existing backend contract.
+        // Real image upload requires backend support.
+        photos: user?.photos || [],
       };
+
       const { data } = await api.put('/users/profile', payload);
       setUser(data);
-      setEditing(false);
+      setEditOpen(false);
+    } catch (error) {
+      console.error('Profile save failed:', error);
+      alert(error?.response?.data?.message || 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -41,37 +97,227 @@ export default function ProfilePage() {
     <AppShell>
       <div className="stack gap16">
         <div className="soft-card profile-view-card">
-          <img src={user?.photos?.[0] || 'https://placehold.co/800x1000?text=Veloura'} alt="profile" className="hero-image slim" />
+          <div className="profile-top-actions">
+            <button
+              className="button ghost small"
+              onClick={() => setSettingsOpen(true)}
+            >
+              Settings
+            </button>
+          </div>
+
+          <img
+            src={displayImage}
+            alt="profile"
+            className="hero-image slim"
+          />
+
           <div className="profile-body">
-            <div className="row between center">
+            <div className="row between center gap12 profile-heading-row">
               <div>
-                <h1>{user?.firstName || 'Your profile'}{user?.age ? `, ${user.age}` : ''}</h1>
-                <div className="muted">{user?.city || 'Add your city'} • {user?.intention || 'Set intention'}</div>
+                <h1>
+                  {user?.firstName || 'Your profile'}
+                  {user?.age ? `, ${user.age}` : ''}
+                </h1>
+                <div className="muted">
+                  {user?.city || 'Add your city'} • {user?.intention || 'Set intention'}
+                </div>
               </div>
-              <button className="button outline small" onClick={() => setEditing((v) => !v)}>{editing ? 'Cancel' : 'Edit'}</button>
+
+              <button
+                className="button outline small"
+                onClick={() => setEditOpen(true)}
+              >
+                Edit Profile
+              </button>
             </div>
+
             <p>{user?.bio || 'No bio yet.'}</p>
-            <div className="chip-grid">
-              {(user?.interests || []).map((item) => <span key={item} className="chip-tag">{item}</span>)}
-            </div>
+
+            {(user?.interests || []).length ? (
+              <div className="chip-grid">
+                {(user?.interests || []).map((item) => (
+                  <span key={item} className="chip-tag">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {editing ? (
-          <div className="soft-card stack gap12">
-            <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} placeholder="First name" />
-            <input value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} placeholder="Age" />
-            <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="City" />
-            <input value={form.intention} onChange={(e) => setForm({ ...form, intention: e.target.value })} placeholder="Intention" />
-            <input value={form.photo} onChange={(e) => setForm({ ...form, photo: e.target.value })} placeholder="Photo URL" />
-            <input value={form.interests} onChange={(e) => setForm({ ...form, interests: e.target.value })} placeholder="Interests comma separated" />
-            <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={5} placeholder="Bio" />
-            <button className="button primary" onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save Profile'}</button>
+        <div className="soft-card stack gap12">
+          <div className="row between center">
+            <div>
+              <h3 className="section-title">Your dating flow</h3>
+              <div className="muted small-text">
+                Likes, matches, chats, and account controls should live as separate flows.
+              </div>
+            </div>
           </div>
-        ) : null}
 
-        <button className="button outline" onClick={logout}>Logout</button>
+          <div className="stack gap8">
+            <button className="button outline">People Who Liked Me</button>
+            <button className="button outline">Chats</button>
+            <button className="button outline" onClick={() => setSettingsOpen(true)}>
+              Open Settings
+            </button>
+          </div>
+        </div>
       </div>
+
+      {editOpen ? (
+        <div className="sf-drawer-overlay" onClick={closeEdit}>
+          <div
+            className="sf-drawer profile-drawer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sf-drawer-handle" />
+            <div className="sf-drawer-header-row">
+              <h3>Edit Profile</h3>
+              <button className="button ghost small" onClick={closeEdit}>
+                Close
+              </button>
+            </div>
+
+            <div className="stack gap12 sf-drawer-scroll">
+              <div className="photo-upload-card">
+                <div className="photo-upload-preview-wrap">
+                  <img
+                    src={photoPreview || user?.photos?.[0] || placeholderImage}
+                    alt="preview"
+                    className="photo-upload-preview"
+                  />
+                </div>
+
+                <label className="button outline photo-upload-button">
+                  Upload Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    hidden
+                  />
+                </label>
+
+                <div className="muted small-text">
+                  Frontend preview is ready. Real photo upload save needs backend file upload support.
+                </div>
+              </div>
+
+              <input
+                value={form.firstName}
+                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                placeholder="First name"
+              />
+
+              <input
+                value={form.age}
+                onChange={(e) => setForm({ ...form, age: e.target.value })}
+                placeholder="Age"
+                inputMode="numeric"
+              />
+
+              <input
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                placeholder="City"
+              />
+
+              <input
+                value={form.intention}
+                onChange={(e) => setForm({ ...form, intention: e.target.value })}
+                placeholder="Intention"
+              />
+
+              <input
+                value={form.interests}
+                onChange={(e) => setForm({ ...form, interests: e.target.value })}
+                placeholder="Interests comma separated"
+              />
+
+              <textarea
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                rows={5}
+                placeholder="Bio"
+              />
+
+              <button
+                className="button primary"
+                onClick={save}
+                disabled={saving}
+              >
+                {saving ? 'Saving...' : 'Save Profile'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {settingsOpen ? (
+        <div
+          className="sf-drawer-overlay"
+          onClick={() => setSettingsOpen(false)}
+        >
+          <div
+            className="sf-drawer profile-drawer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sf-drawer-handle" />
+            <div className="sf-drawer-header-row">
+              <h3>Settings</h3>
+              <button
+                className="button ghost small"
+                onClick={() => setSettingsOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="stack gap12 sf-drawer-scroll">
+              <div className="settings-block">
+                <div className="settings-label">Account</div>
+                <button className="button outline" onClick={() => {
+                  setSettingsOpen(false);
+                  setEditOpen(true);
+                }}>
+                  Edit Profile
+                </button>
+                <button className="button outline">Notifications</button>
+                <button className="button outline">Privacy & Safety</button>
+              </div>
+
+              <div className="settings-block premium-block">
+                <div className="settings-label">Subscription</div>
+
+                <div className="premium-card">
+                  <h4>Get Premium</h4>
+                  <p className="muted">
+                    Unlock more visibility, advanced filters, and stronger matching features.
+                  </p>
+                  <button className="button primary">Upgrade to Premium</button>
+                </div>
+
+                <div className="premium-card premium-card-pro">
+                  <h4>Premium Pro Pack</h4>
+                  <p className="muted">
+                    Priority placement, better reach, premium boosts, and elite profile advantages.
+                  </p>
+                  <button className="button primary">Get Pro Pack</button>
+                </div>
+              </div>
+
+              <div className="settings-block">
+                <div className="settings-label">Session</div>
+                <button className="button outline dangerish" onClick={logout}>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AppShell>
   );
 }
