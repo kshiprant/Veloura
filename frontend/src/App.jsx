@@ -16,6 +16,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/signup" element={<SignUpPage />} />
+
       <Route
         path="/onboarding"
         element={
@@ -24,6 +25,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/discover"
         element={
@@ -32,6 +34,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/matches"
         element={
@@ -40,6 +43,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/likes-you"
         element={
@@ -48,6 +52,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/profile"
         element={
@@ -56,6 +61,17 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* 👇 ADD THIS */}
+      <Route
+        path="/premium"
+        element={
+          <ProtectedRoute>
+            <PremiumPage />
+          </ProtectedRoute>
+        }
+      />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
