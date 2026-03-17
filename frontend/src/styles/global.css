@@ -1259,3 +1259,8 @@ p { line-height: 1.6; }
     font-size:28px;
   }
 }
+.discover-likes-count{
+  margin-top:8px;
+  font-size:13px;
+  color:#5f4b52;
+}
