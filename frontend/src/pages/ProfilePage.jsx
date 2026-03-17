@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppShell from '../components/AppShell';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +8,7 @@ const placeholderImage = 'https://placehold.co/800x1000?text=Veloura';
 
 export default function ProfilePage() {
   const { user, setUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [editOpen, setEditOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -65,7 +67,25 @@ export default function ProfilePage() {
 
   const save = async () => {
     setSaving(true);
+
     try {
+      let uploadedPhotos = user?.photos || [];
+
+      if (selectedPhotoFile) {
+        const photoData = new FormData();
+        photoData.append('photo', selectedPhotoFile);
+
+        const uploadRes = await api.post('/users/profile/photo', photoData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        if (uploadRes?.data?.photoUrl) {
+          uploadedPhotos = [uploadRes.data.photoUrl];
+        }
+      }
+
       const payload = {
         firstName: form.firstName.trim(),
         age: form.age ? Number(form.age) : null,
@@ -76,15 +96,13 @@ export default function ProfilePage() {
           .split(',')
           .map((v) => v.trim())
           .filter(Boolean),
-        // Temporary:
-        // This preserves existing backend contract.
-        // Real image upload requires backend support.
-        photos: user?.photos || [],
+        photos: uploadedPhotos,
       };
 
       const { data } = await api.put('/users/profile', payload);
       setUser(data);
       setEditOpen(false);
+      setSelectedPhotoFile(null);
     } catch (error) {
       console.error('Profile save failed:', error);
       alert(error?.response?.data?.message || 'Failed to save profile');
@@ -146,21 +164,44 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="soft-card stack gap12">
-          <div className="row between center">
-            <div>
-              <h3 className="section-title">Your dating flow</h3>
-              <div className="muted small-text">
-                Likes, matches, chats, and account controls should live as separate flows.
-              </div>
-            </div>
+        <div className="soft-card profile-quick-actions">
+          <div className="profile-section-head">
+            <h3 className="section-title">Quick Access</h3>
+            <div className="muted small-text">Everything important, one tap away.</div>
           </div>
 
-          <div className="stack gap8">
-            <button className="button outline">People Who Liked Me</button>
-            <button className="button outline">Chats</button>
-            <button className="button outline" onClick={() => setSettingsOpen(true)}>
-              Open Settings
+          <div className="quick-action-grid">
+            <button
+              className="quick-action-card"
+              onClick={() => navigate('/matches')}
+            >
+              <div className="quick-action-icon">♡</div>
+              <div className="quick-action-text">
+                <div className="quick-action-title">Liked You</div>
+                <div className="quick-action-subtitle">See who is interested</div>
+              </div>
+            </button>
+
+            <button
+              className="quick-action-card"
+              onClick={() => navigate('/matches')}
+            >
+              <div className="quick-action-icon">✉</div>
+              <div className="quick-action-text">
+                <div className="quick-action-title">Chats</div>
+                <div className="quick-action-subtitle">Open your conversations</div>
+              </div>
+            </button>
+
+            <button
+              className="quick-action-card quick-action-card-wide"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <div className="quick-action-icon">⚙</div>
+              <div className="quick-action-text">
+                <div className="quick-action-title">Settings</div>
+                <div className="quick-action-subtitle">Premium, account, and preferences</div>
+              </div>
             </button>
           </div>
         </div>
@@ -199,10 +240,6 @@ export default function ProfilePage() {
                     hidden
                   />
                 </label>
-
-                <div className="muted small-text">
-                  Frontend preview is ready. Real photo upload save needs backend file upload support.
-                </div>
               </div>
 
               <input
@@ -278,10 +315,13 @@ export default function ProfilePage() {
             <div className="stack gap12 sf-drawer-scroll">
               <div className="settings-block">
                 <div className="settings-label">Account</div>
-                <button className="button outline" onClick={() => {
-                  setSettingsOpen(false);
-                  setEditOpen(true);
-                }}>
+                <button
+                  className="button outline"
+                  onClick={() => {
+                    setSettingsOpen(false);
+                    setEditOpen(true);
+                  }}
+                >
                   Edit Profile
                 </button>
                 <button className="button outline">Notifications</button>
