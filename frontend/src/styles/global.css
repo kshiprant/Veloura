@@ -1269,3 +1269,39 @@ p { line-height: 1.6; }
   height:20px;
   accent-color:#8a1538;
 }
+.bottom-nav {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 10px;
+  background: rgba(25,18,18,0.92);
+  backdrop-filter: blur(14px);
+  border-radius: 28px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  gap: 6px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 6px;
+  border-radius: 16px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+}
+
+.nav-icon {
+  font-size: 18px;
+}
+
+.nav-item.active {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
