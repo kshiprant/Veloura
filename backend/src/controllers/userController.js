@@ -11,6 +11,7 @@ export async function saveOnboarding(req, res) {
 
     const allowed = ['firstName', 'age', 'gender', 'city', 'photos', 'bio', 'interests', 'prompts', 'intention'];
     const updates = {};
+
     for (const key of allowed) {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     }
@@ -190,5 +191,34 @@ export async function getLikesReceived(req, res) {
   } catch (error) {
     console.error('get likes received error', error);
     return res.status(500).json({ message: 'Could not load likes received' });
+  }
+}
+
+export async function uploadProfilePhoto(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const photoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.photos = [photoUrl];
+    await user.save();
+
+    return res.json({
+      message: 'Photo uploaded successfully',
+      photoUrl,
+      user,
+    });
+  } catch (error) {
+    console.error('upload profile photo error', error);
+    return res.status(500).json({ message: 'Could not upload photo' });
   }
 }
