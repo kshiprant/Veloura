@@ -27,6 +27,24 @@ function getLikesRemaining(user) {
   return Math.max(0, FREE_DAILY_LIKE_LIMIT - (user.likesTodayCount || 0));
 }
 
+function getDistanceKm(lat1, lng1, lat2, lng2) {
+  const toRad = (value) => (value * Math.PI) / 180;
+
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export async function saveOnboarding(req, res) {
   try {
     const errors = validationResult(req);
@@ -63,7 +81,20 @@ export async function saveOnboarding(req, res) {
 
 export async function updateProfile(req, res) {
   try {
-    const fields = ['firstName', 'age', 'gender', 'city', 'bio', 'photos', 'interests', 'prompts', 'intention'];
+    const fields = [
+      'firstName',
+      'age',
+      'gender',
+      'city',
+      'bio',
+      'photos',
+      'interests',
+      'prompts',
+      'intention',
+      'location',
+      'showDistance',
+    ];
+
     const updates = {};
 
     for (const field of fields) {
@@ -84,7 +115,7 @@ export async function updateProfile(req, res) {
 
 export async function getDiscovery(req, res) {
   try {
-    const currentUser = await User.findById(req.user._id).select('likesSent');
+    const currentUser = await User.findById(req.user._id).select('likesSent location');
     const matches = await Match.find({ users: req.user._id }).select('users');
 
     const matchedUserIds = matches
@@ -99,9 +130,42 @@ export async function getDiscovery(req, res) {
     })
       .select('-password -likesSent -likesReceived -matches')
       .sort({ lastActiveAt: -1 })
-      .limit(25);
+      .limit(50);
 
-    return res.json(users);
+    const myLat = currentUser?.location?.coordinates?.lat;
+    const myLng = currentUser?.location?.coordinates?.lng;
+
+    if (typeof myLat !== 'number' || typeof myLng !== 'number') {
+      return res.json(users.slice(0, 25));
+    }
+
+    const withDistance = users.map((u) => {
+      const lat = u?.location?.coordinates?.lat;
+      const lng = u?.location?.coordinates?.lng;
+
+      if (typeof lat !== 'number' || typeof lng !== 'number') {
+        return {
+          ...u.toObject(),
+          distanceKm: null,
+        };
+      }
+
+      const distanceKm = getDistanceKm(myLat, myLng, lat, lng);
+
+      return {
+        ...u.toObject(),
+        distanceKm: Math.round(distanceKm),
+      };
+    });
+
+    withDistance.sort((a, b) => {
+      if (a.distanceKm == null && b.distanceKm == null) return 0;
+      if (a.distanceKm == null) return 1;
+      if (b.distanceKm == null) return -1;
+      return a.distanceKm - b.distanceKm;
+    });
+
+    return res.json(withDistance.slice(0, 25));
   } catch (error) {
     console.error('get discovery error', error);
     return res.status(500).json({ message: 'Could not load discovery' });
@@ -215,7 +279,7 @@ export async function getMyMatches(req, res) {
     const matches = await Match.find({ users: req.user._id })
       .populate({
         path: 'users',
-        select: 'firstName age city photos bio interests intention lastActiveAt plan',
+        select: 'firstName age city photos bio interests intention lastActiveAt plan location showDistance',
       })
       .sort({ lastMessageAt: -1, createdAt: -1 });
 
@@ -261,7 +325,7 @@ export async function getLikesReceived(req, res) {
       _id: { $in: filteredIds },
       onboardingCompleted: true,
     })
-      .select('firstName age city photos bio interests intention lastActiveAt plan')
+      .select('firstName age city photos bio interests intention lastActiveAt plan location showDistance')
       .sort({ lastActiveAt: -1 });
 
     return res.json(users);
