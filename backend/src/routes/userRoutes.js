@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import auth from '../middleware/auth.js';
-import upload from '../middleware/upload.js'; // ✅ ADD THIS
+import upload from '../middleware/upload.js';
 
 import {
   getDiscovery,
@@ -10,7 +10,8 @@ import {
   likeUser,
   saveOnboarding,
   updateProfile,
-  uploadProfilePhoto // ✅ ADD THIS
+  uploadProfilePhoto,
+  deleteProfile
 } from '../controllers/userController.js';
 
 const router = Router();
@@ -30,9 +31,8 @@ router.put(
 );
 
 router.put('/profile', updateProfile);
-
-// ✅ ADD THIS ROUTE (IMPORTANT)
 router.post('/profile/photo', upload.single('photo'), uploadProfilePhoto);
+router.delete('/profile', deleteProfile);
 
 router.get('/discovery', getDiscovery);
 router.get('/likes-received', getLikesReceived);
