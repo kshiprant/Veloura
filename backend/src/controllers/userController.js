@@ -1,4 +1,5 @@
 import { validationResult } from 'express-validator';
+import cloudinary from '../config/cloudinary.js';
 import User from '../models/User.js';
 import Match from '../models/Match.js';
 import Message from '../models/Message.js';
@@ -201,11 +202,20 @@ export async function uploadProfilePhoto(req, res) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const publicBaseUrl =
-      process.env.PUBLIC_BACKEND_URL ||
-      `${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}`;
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'veloura_profiles',
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
 
-    const photoUrl = `${publicBaseUrl}/uploads/${req.file.filename}`;
+      stream.end(req.file.buffer);
+    });
 
     const user = await User.findById(req.user._id);
 
@@ -213,12 +223,12 @@ export async function uploadProfilePhoto(req, res) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.photos = [photoUrl];
+    user.photos = [uploadResult.secure_url];
     await user.save();
 
     return res.json({
       message: 'Photo uploaded successfully',
-      photoUrl,
+      photoUrl: uploadResult.secure_url,
       user,
     });
   } catch (error) {
@@ -262,4 +272,4 @@ export async function deleteProfile(req, res) {
     console.error('delete profile error', error);
     return res.status(500).json({ message: 'Could not delete profile' });
   }
-          }
+        }
