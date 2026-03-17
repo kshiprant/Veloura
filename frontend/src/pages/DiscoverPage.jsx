@@ -71,9 +71,7 @@ export default function DiscoverPage() {
 
       if (isFree && typeof data?.likesRemaining === 'number') {
         setLikesRemaining(data.likesRemaining);
-        if (data.likesRemaining <= 0) {
-          setLikeLimitReached(true);
-        }
+        if (data.likesRemaining <= 0) setLikeLimitReached(true);
       }
 
       setTimeout(() => setNotice(''), 2500);
@@ -86,13 +84,8 @@ export default function DiscoverPage() {
 
       setNotice(message);
 
-      if (typeof remaining === 'number') {
-        setLikesRemaining(remaining);
-      }
-
-      if (status === 403 || status === 429) {
-        setLikeLimitReached(true);
-      }
+      if (typeof remaining === 'number') setLikesRemaining(remaining);
+      if (status === 403 || status === 429) setLikeLimitReached(true);
 
       setTimeout(() => setNotice(''), 2500);
     }
@@ -103,6 +96,7 @@ export default function DiscoverPage() {
   return (
     <AppShell>
       <div className="stack gap16">
+        {/* Header */}
         <div className="row between center">
           <div>
             <h2>Discover</h2>
@@ -111,23 +105,20 @@ export default function DiscoverPage() {
           {notice ? <div className="success-pill">{notice}</div> : null}
         </div>
 
+        {/* Clean Upgrade Card */}
         {isFree ? (
-          <div className="soft-card discover-plan-banner">
-            <div className="discover-plan-copy">
-              <div className="strong">Free plan</div>
-              <div className="muted small-text">
-                Daily likes are limited. Upgrade to Premium for unlimited likes and to see who liked you.
-              </div>
-              <div className="discover-likes-count">
-                Likes left today:{' '}
-                <span className="strong">
-                  {typeof likesRemaining === 'number' ? likesRemaining : FREE_DAILY_LIKE_LIMIT}
-                </span>
+          <div className="discover-upgrade-card">
+            <div>
+              <div className="discover-upgrade-title">Free plan</div>
+              <div className="discover-upgrade-sub">
+                {typeof likesRemaining === 'number'
+                  ? `${likesRemaining} likes left today`
+                  : 'Limited likes today'}
               </div>
             </div>
 
             <button
-              className="button outline small"
+              className="discover-upgrade-btn"
               onClick={() => navigate('/premium')}
             >
               Upgrade
@@ -135,11 +126,12 @@ export default function DiscoverPage() {
           </div>
         ) : null}
 
+        {/* Lock Card */}
         {likeLimitReached && isFree ? (
           <div className="soft-card discover-lock-card">
             <h3>Daily like limit reached</h3>
             <p className="muted">
-              Upgrade to Premium to continue liking without limits and unlock Likes You.
+              Upgrade to continue liking without limits
             </p>
 
             <div className="footer-actions no-top">
@@ -147,19 +139,20 @@ export default function DiscoverPage() {
                 className="button outline half"
                 onClick={() => navigate('/premium')}
               >
-                Get Premium
+                Premium
               </button>
 
               <button
                 className="button primary half"
                 onClick={() => navigate('/premium-pro')}
               >
-                Get Pro
+                Pro
               </button>
             </div>
           </div>
         ) : null}
 
+        {/* States */}
         {loading ? <div className="soft-card">Loading profiles...</div> : null}
 
         {!loading && error ? (
@@ -167,9 +160,10 @@ export default function DiscoverPage() {
         ) : null}
 
         {!loading && !error && !current ? (
-          <div className="soft-card">No more profiles for now. Come back later.</div>
+          <div className="soft-card">No more profiles for now.</div>
         ) : null}
 
+        {/* Profile */}
         {current ? (
           <div className="profile-card soft-card">
             <img
@@ -184,7 +178,11 @@ export default function DiscoverPage() {
               </h1>
 
               <div className="muted">
-                {current.city} • {current.intention}
+                {current.city}
+                {typeof current.distanceKm === 'number'
+                  ? ` • ${current.distanceKm} km`
+                  : ''}
+                {current.intention ? ` • ${current.intention}` : ''}
               </div>
 
               <p>{current.bio || 'No bio yet.'}</p>
@@ -195,17 +193,6 @@ export default function DiscoverPage() {
                     {item}
                   </span>
                 ))}
-              </div>
-
-              <div className="stack gap12 top16">
-                {(current.prompts || [])
-                  .filter((p) => p.answer)
-                  .map((p) => (
-                    <div key={p.question} className="prompt-card small">
-                      <div className="prompt-title">{p.question}</div>
-                      <p>{p.answer}</p>
-                    </div>
-                  ))}
               </div>
             </div>
 
@@ -230,4 +217,4 @@ export default function DiscoverPage() {
       </div>
     </AppShell>
   );
-}
+                    }
