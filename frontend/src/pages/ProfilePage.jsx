@@ -311,57 +311,83 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <div className="stack gap12 sf-drawer-scroll">
-              <div className="settings-block">
+            <div className="settings-sheet">
+              <div className="settings-group">
                 <div className="settings-label">Account</div>
+
                 <button
-                  className="button outline"
+                  className="settings-row"
                   onClick={() => {
                     setSettingsOpen(false);
                     setEditOpen(true);
                   }}
                 >
-                  Edit Profile
+                  <span>Edit Profile</span>
+                  <span className="settings-arrow">›</span>
                 </button>
-                <button className="button outline">Notifications</button>
-                <button className="button outline">Privacy & Safety</button>
+
+                <button className="settings-row">
+                  <span>Notifications</span>
+                  <span className="settings-arrow">›</span>
+                </button>
+
+                <button className="settings-row">
+                  <span>Privacy &amp; Safety</span>
+                  <span className="settings-arrow">›</span>
+                </button>
               </div>
 
-              <div className="settings-block premium-block">
+              <div className="settings-group premium-group">
                 <div className="settings-label">Subscription</div>
 
                 <div className="premium-card">
-                  <h4>Get Premium</h4>
+                  <div className="premium-card-top">
+                    <h4>Get Premium</h4>
+                    <span className="premium-badge">Popular</span>
+                  </div>
+
                   <p className="muted">
                     Unlock more visibility, advanced filters, and stronger matching features.
                   </p>
-                  <button className="button primary">Upgrade to Premium</button>
+
+                  <button className="button primary premium-cta">
+                    Upgrade to Premium
+                  </button>
                 </div>
 
                 <div className="premium-card premium-card-pro">
-                  <h4>Premium Pro Pack</h4>
+                  <div className="premium-card-top">
+                    <h4>Premium Pro Pack</h4>
+                    <span className="premium-badge premium-badge-dark">Pro</span>
+                  </div>
+
                   <p className="muted">
                     Priority placement, better reach, premium boosts, and elite profile advantages.
                   </p>
-                  <button className="button primary">Get Pro Pack</button>
+
+                  <button className="button primary premium-cta">
+                    Get Pro Pack
+                  </button>
                 </div>
               </div>
 
-              <div className="settings-block">
+              <div className="settings-group">
                 <div className="settings-label">Danger Zone</div>
                 <button
-                  className="button outline dangerish"
+                  className="settings-row settings-row-danger"
                   onClick={handleDeleteProfile}
                   disabled={deleting}
                 >
-                  {deleting ? 'Deleting...' : 'Delete Profile'}
+                  <span>{deleting ? 'Deleting...' : 'Delete Profile'}</span>
+                  <span className="settings-arrow">›</span>
                 </button>
               </div>
 
-              <div className="settings-block">
+              <div className="settings-group">
                 <div className="settings-label">Session</div>
-                <button className="button outline" onClick={logout}>
-                  Logout
+                <button className="settings-row" onClick={logout}>
+                  <span>Logout</span>
+                  <span className="settings-arrow">›</span>
                 </button>
               </div>
             </div>
@@ -370,4 +396,4 @@ export default function ProfilePage() {
       ) : null}
     </AppShell>
   );
-}
+                }
