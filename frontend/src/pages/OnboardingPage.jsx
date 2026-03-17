@@ -16,15 +16,17 @@ const placeholderPhotos = [
 export default function OnboardingPage() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoError, setPhotoError] = useState('');
+  const [stepError, setStepError] = useState('');
 
   const [form, setForm] = useState({
     firstName: user?.firstName || '',
     age: user?.age || '',
-    gender: user?.gender || 'Man',
+    gender: user?.gender || '',
     city: user?.city || '',
     photos: user?.photos?.length ? user.photos : [],
     bio: user?.bio || '',
@@ -32,21 +34,69 @@ export default function OnboardingPage() {
     prompts: user?.prompts?.length
       ? user.prompts
       : promptOptions.map((question) => ({ question, answer: '' })),
-    intention: user?.intention || 'New friends'
+    intention: user?.intention || ''
   });
 
   const progress = useMemo(() => `${step} of 6`, [step]);
 
   const save = async (overrides = {}) => {
-    const payload = { ...form, ...overrides, age: Number(form.age) };
+    const payload = {
+      ...form,
+      ...overrides,
+      age: form.age ? Number(form.age) : undefined
+    };
+
     const { data } = await api.put('/users/onboarding', payload);
     setUser(data);
     return data;
   };
 
+  const validateStep = () => {
+    const trimmedName = form.firstName.trim();
+    const trimmedCity = form.city.trim();
+    const numericAge = Number(form.age);
+    const trimmedBio = form.bio.trim();
+    const answeredPrompts = form.prompts.filter((p) => p.answer?.trim());
+
+    if (step === 1) {
+      if (!trimmedName) return 'First name is required.';
+      if (!form.age || Number.isNaN(numericAge)) return 'Age is required.';
+      if (numericAge < 18 || numericAge > 100) return 'Age must be between 18 and 100.';
+      if (!form.gender) return 'Please select your gender.';
+      if (!trimmedCity) return 'City is required.';
+    }
+
+    if (step === 2) {
+      if (!form.photos.length) return 'Please upload a photo before continuing.';
+    }
+
+    if (step === 3) {
+      if (!trimmedBio) return 'Bio is required.';
+      if (trimmedBio.length < 10) return 'Bio should be at least 10 characters.';
+    }
+
+    if (step === 4) {
+      if (form.interests.length < 3) return 'Please choose at least 3 interests.';
+    }
+
+    if (step === 5) {
+      if (!answeredPrompts.length) return 'Please answer at least one prompt.';
+    }
+
+    if (step === 6) {
+      if (!form.intention) return 'Please select what you are looking for.';
+    }
+
+    return '';
+  };
+
   const next = async () => {
-    if (step === 2 && !form.photos.length) {
-      setPhotoError('Please upload a photo before continuing');
+    setStepError('');
+    setPhotoError('');
+
+    const validationMessage = validateStep();
+    if (validationMessage) {
+      setStepError(validationMessage);
       return;
     }
 
@@ -55,6 +105,9 @@ export default function OnboardingPage() {
       try {
         await save();
         setStep((s) => s + 1);
+      } catch (error) {
+        console.error('Onboarding save failed:', error);
+        setStepError(error?.response?.data?.message || 'Could not save this step.');
       } finally {
         setLoading(false);
       }
@@ -65,14 +118,22 @@ export default function OnboardingPage() {
     try {
       await save({ onboardingCompleted: true });
       navigate('/discover');
+    } catch (error) {
+      console.error('Onboarding completion failed:', error);
+      setStepError(error?.response?.data?.message || 'Could not complete onboarding.');
     } finally {
       setLoading(false);
     }
   };
 
-  const back = () => setStep((s) => Math.max(1, s - 1));
+  const back = () => {
+    setStepError('');
+    setPhotoError('');
+    setStep((s) => Math.max(1, s - 1));
+  };
 
   const toggleInterest = (item) => {
+    setStepError('');
     setForm((prev) => ({
       ...prev,
       interests: prev.interests.includes(item)
@@ -88,6 +149,7 @@ export default function OnboardingPage() {
     if (!file) return;
 
     setPhotoError('');
+    setStepError('');
     setPhotoUploading(true);
 
     try {
@@ -137,7 +199,10 @@ export default function OnboardingPage() {
             <label>First Name</label>
             <input
               value={form.firstName}
-              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+              onChange={(e) => {
+                setStepError('');
+                setForm({ ...form, firstName: e.target.value });
+              }}
               placeholder="Your first name"
             />
 
@@ -145,7 +210,10 @@ export default function OnboardingPage() {
             <input
               type="number"
               value={form.age}
-              onChange={(e) => setForm({ ...form, age: e.target.value })}
+              onChange={(e) => {
+                setStepError('');
+                setForm({ ...form, age: e.target.value });
+              }}
               placeholder="25"
             />
 
@@ -156,7 +224,10 @@ export default function OnboardingPage() {
                   key={item}
                   type="button"
                   className={`chip-button ${form.gender === item ? 'selected' : ''}`}
-                  onClick={() => setForm({ ...form, gender: item })}
+                  onClick={() => {
+                    setStepError('');
+                    setForm({ ...form, gender: item });
+                  }}
                 >
                   {item}
                 </button>
@@ -166,7 +237,10 @@ export default function OnboardingPage() {
             <label>City</label>
             <input
               value={form.city}
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
+              onChange={(e) => {
+                setStepError('');
+                setForm({ ...form, city: e.target.value });
+              }}
               placeholder="Vadodara"
             />
           </div>
@@ -209,7 +283,10 @@ export default function OnboardingPage() {
             <label>Bio</label>
             <textarea
               value={form.bio}
-              onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              onChange={(e) => {
+                setStepError('');
+                setForm({ ...form, bio: e.target.value });
+              }}
               placeholder="What makes you, you?"
               rows={6}
             />
@@ -247,6 +324,7 @@ export default function OnboardingPage() {
                   rows={4}
                   value={prompt.answer}
                   onChange={(e) => {
+                    setStepError('');
                     const prompts = [...form.prompts];
                     prompts[idx] = { ...prompts[idx], answer: e.target.value };
                     setForm({ ...form, prompts });
@@ -268,7 +346,10 @@ export default function OnboardingPage() {
                   key={item}
                   type="button"
                   className={`intent-card ${form.intention === item ? 'selected' : ''}`}
-                  onClick={() => setForm({ ...form, intention: item })}
+                  onClick={() => {
+                    setStepError('');
+                    setForm({ ...form, intention: item });
+                  }}
                 >
                   {item}
                 </button>
@@ -276,6 +357,8 @@ export default function OnboardingPage() {
             </div>
           </div>
         )}
+
+        {stepError ? <div className="auth-error top16">{stepError}</div> : null}
 
         <div className="footer-actions">
           {step > 1 ? (
