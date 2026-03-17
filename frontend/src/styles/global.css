@@ -256,3 +256,143 @@ p { line-height: 1.6; }
   .hero-card h1 { font-size: 3.4rem; }
   .footer-actions { grid-template-columns: 1fr 1fr; }
 }
+.profile-top-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:12px;
+}
+
+.profile-heading-row{
+  align-items:flex-start;
+}
+
+.section-title{
+  margin:0;
+}
+
+.small-text{
+  font-size:13px;
+}
+
+.sf-drawer-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.35);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  z-index:999;
+}
+
+.sf-drawer{
+  width:100%;
+  max-width:980px;
+  background:#fff;
+  border-radius:26px 26px 0 0;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  max-height:88vh;
+  box-shadow:0 -10px 30px rgba(15,23,42,.15);
+}
+
+.profile-drawer{
+  padding-bottom:24px;
+}
+
+.sf-drawer-handle{
+  width:42px;
+  height:5px;
+  border-radius:999px;
+  background:#cbd5e1;
+  margin:0 auto 4px;
+}
+
+.sf-drawer-header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.sf-drawer-header-row h3{
+  margin:0;
+}
+
+.sf-drawer-scroll{
+  overflow-y:auto;
+  padding-top:4px;
+}
+
+.photo-upload-card{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.photo-upload-preview-wrap{
+  width:100%;
+  border-radius:24px;
+  overflow:hidden;
+  background:#f3f4f6;
+  border:1px solid rgba(15,23,42,.08);
+}
+
+.photo-upload-preview{
+  width:100%;
+  display:block;
+  aspect-ratio:4/5;
+  object-fit:cover;
+}
+
+.photo-upload-button{
+  width:100%;
+  justify-content:center;
+}
+
+.settings-block{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.settings-label{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.02em;
+  color:#6b7280;
+  text-transform:uppercase;
+}
+
+.premium-block{
+  margin-top:4px;
+}
+
+.premium-card{
+  border:1px solid rgba(128,0,64,.16);
+  border-radius:22px;
+  padding:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(250,244,247,1) 100%);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.premium-card h4{
+  margin:0;
+}
+
+.premium-card p{
+  margin:0;
+}
+
+.premium-card-pro{
+  border-color:rgba(128,0,64,.24);
+  box-shadow:0 12px 28px rgba(128,0,64,.08);
+}
+
+.dangerish{
+  border-color:#8a1538;
+  color:#8a1538;
+}
