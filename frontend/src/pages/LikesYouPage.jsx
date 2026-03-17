@@ -1,18 +1,38 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import AppShell from '../components/AppShell';
+import api from '../api/client';
+import { useNavigate } from 'react-router-dom';
 
 export default function LikesYouPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [likedUsers, setLikedUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const isPremium = user?.plan === 'premium' || user?.plan === 'pro';
 
-  // mock data for now (replace later with API)
-  const likedUsers = [
-    { id: 1, name: 'Aanya', image: 'https://placehold.co/300x400' },
-    { id: 2, name: 'Riya', image: 'https://placehold.co/300x400' },
-    { id: 3, name: 'Simran', image: 'https://placehold.co/300x400' },
-    { id: 4, name: 'Megha', image: 'https://placehold.co/300x400' },
-  ];
+  useEffect(() => {
+    if (!isPremium) {
+      setLoading(false);
+      return;
+    }
+
+    const loadLikes = async () => {
+      try {
+        const { data } = await api.get('/users/likes-received');
+        setLikedUsers(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Failed to load likes:', error);
+        setLikedUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLikes();
+  }, [isPremium]);
 
   return (
     <AppShell>
@@ -25,9 +45,9 @@ export default function LikesYouPage() {
         {!isPremium ? (
           <div className="likes-locked">
             <div className="likes-grid blurred">
-              {likedUsers.map((user) => (
-                <div key={user.id} className="like-card">
-                  <img src={user.image} alt="" />
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="like-card">
+                  <img src="https://placehold.co/300x400" alt="" />
                 </div>
               ))}
             </div>
@@ -40,21 +60,39 @@ export default function LikesYouPage() {
 
               <button
                 className="button primary"
-                onClick={() => (window.location.href = '/premium')}
+                onClick={() => navigate('/premium')}
               >
                 Upgrade to Premium
               </button>
             </div>
           </div>
         ) : (
-          <div className="likes-grid">
-            {likedUsers.map((user) => (
-              <div key={user.id} className="like-card">
-                <img src={user.image} alt="" />
-                <div className="like-name">{user.name}</div>
+          <>
+            {loading ? (
+              <div className="soft-card">Loading likes...</div>
+            ) : likedUsers.length === 0 ? (
+              <div className="soft-card">
+                No one has liked you yet.
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="likes-grid">
+                {likedUsers.map((u) => (
+                  <div key={u._id} className="like-card">
+                    <img
+                      src={u.photos?.[0] || 'https://placehold.co/300x400'}
+                      alt={u.firstName}
+                    />
+                    <div className="like-name">
+                      {u.firstName}, {u.age}
+                    </div>
+                    <div className="muted small-text">
+                      {u.city}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </AppShell>
