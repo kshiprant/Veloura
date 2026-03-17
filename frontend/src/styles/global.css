@@ -1155,3 +1155,107 @@ p { line-height: 1.6; }
   background:rgba(255,255,255,.7);
   border:1px solid rgba(138,21,56,.08);
 }
+.checkout-option-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+
+.checkout-option-card{
+  border:1px solid rgba(138,21,56,.10);
+  border-radius:24px;
+  padding:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(250,245,247,1) 100%);
+  text-align:left;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  box-shadow:0 10px 24px rgba(36,24,27,.05);
+}
+
+.checkout-option-card.selected{
+  border-color:rgba(138,21,56,.26);
+  box-shadow:0 14px 28px rgba(138,21,56,.10);
+}
+
+.checkout-option-title{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:#8a1538;
+}
+
+.checkout-option-price{
+  margin-top:8px;
+  font-size:30px;
+  font-weight:800;
+  color:#24181b;
+}
+
+.checkout-method-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.checkout-method-row{
+  width:100%;
+  min-height:60px;
+  padding:0 18px;
+  border-radius:20px;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(138,21,56,.10);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  text-align:left;
+  box-shadow:0 8px 20px rgba(36,24,27,.05);
+}
+
+.checkout-method-row.selected{
+  border-color:rgba(138,21,56,.24);
+  box-shadow:0 12px 24px rgba(138,21,56,.08);
+}
+
+.checkout-method-tag{
+  font-size:12px;
+  font-weight:700;
+  color:#8a1538;
+}
+
+.checkout-summary{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.checkout-summary-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(15,23,42,.08);
+}
+
+.checkout-summary-row:last-child{
+  border-bottom:none;
+}
+
+.checkout-summary-total{
+  font-weight:800;
+  font-size:1.05rem;
+}
+
+.checkout-pay-button{
+  width:100%;
+}
+
+@media (max-width: 640px){
+  .checkout-option-grid{
+    grid-template-columns:1fr;
+  }
+
+  .checkout-option-price{
+    font-size:28px;
+  }
+}
