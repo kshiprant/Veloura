@@ -1,42 +1,31 @@
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+export async function uploadProfilePhoto(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
 
-const uploadDir = path.join(process.cwd(), 'uploads');
+    const publicBaseUrl =
+      process.env.PUBLIC_BACKEND_URL ||
+      `${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}`;
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+    const photoUrl = `${publicBaseUrl}/uploads/${req.file.filename}`;
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const baseName = path
-      .basename(file.originalname, ext)
-      .replace(/\s+/g, '-')
-      .toLowerCase();
+    const user = await User.findById(req.user._id);
 
-    cb(null, `${Date.now()}-${baseName}${ext}`);
-  },
-});
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-const fileFilter = (_req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed'));
+    user.photos = [photoUrl];
+    await user.save();
+
+    return res.json({
+      message: 'Photo uploaded successfully',
+      photoUrl,
+      user,
+    });
+  } catch (error) {
+    console.error('upload profile photo error', error);
+    return res.status(500).json({ message: 'Could not upload photo' });
   }
-};
-
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024,
-  },
-});
-
-export default upload;
+}
