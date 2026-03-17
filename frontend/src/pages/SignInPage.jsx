@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../api/client"; // ✅ use shared client
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -8,15 +8,12 @@ export default function SignInPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        import.meta.env.VITE_API_URL + "/auth/login",
-        { email, password }
-      );
+      const res = await api.post("/auth/login", { email, password });
 
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("veloura_token", res.data.token);
       alert("Login successful");
     } catch (err) {
-      alert("Login failed");
+      alert(err.response?.data?.message || "Login failed");
     }
   };
 
