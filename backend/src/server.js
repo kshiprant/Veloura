@@ -3,6 +3,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'path';
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 
@@ -39,6 +40,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
+
+// serves uploaded images publicly
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 const io = new Server(server, {
   cors: corsOptions
