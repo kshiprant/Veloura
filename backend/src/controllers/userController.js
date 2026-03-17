@@ -4,6 +4,20 @@ import User from '../models/User.js';
 import Match from '../models/Match.js';
 import Message from '../models/Message.js';
 
+const FREE_DAILY_LIKE_LIMIT = 15;
+
+function resetDailyLikeWindowIfNeeded(user) {
+  const now = new Date();
+
+  if (!user.likesResetAt || now >= user.likesResetAt) {
+    user.likesTodayCount = 0;
+
+    const nextReset = new Date(now);
+    nextReset.setHours(24, 0, 0, 0);
+    user.likesResetAt = nextReset;
+  }
+}
+
 export async function saveOnboarding(req, res) {
   try {
     const errors = validationResult(req);
@@ -96,6 +110,10 @@ export async function likeUser(req, res) {
     const user = await User.findById(req.user._id);
     const target = await User.findById(targetUserId);
 
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     if (!target || !target.onboardingCompleted) {
       return res.status(404).json({ message: 'Profile not found' });
     }
@@ -108,15 +126,38 @@ export async function likeUser(req, res) {
       return res.json({ matched: true, matchId: alreadyMatched._id });
     }
 
-    if (!user.likesSent.some((id) => String(id) === String(target._id))) {
-      user.likesSent.push(target._id);
+    const isPaidUser = user.plan === 'premium' || user.plan === 'pro';
+
+    if (!isPaidUser) {
+      resetDailyLikeWindowIfNeeded(user);
+
+      if ((user.likesTodayCount || 0) >= FREE_DAILY_LIKE_LIMIT) {
+        await user.save();
+
+        return res.status(403).json({
+          message: 'Daily like limit reached. Upgrade to Premium for unlimited likes.',
+          code: 'LIKE_LIMIT_REACHED',
+          likesRemaining: 0,
+          resetAt: user.likesResetAt,
+        });
+      }
     }
+
+    if (user.likesSent.some((id) => String(id) === String(target._id))) {
+      return res.json({ matched: false, message: 'Like already sent' });
+    }
+
+    user.likesSent.push(target._id);
 
     if (!target.likesReceived.some((id) => String(id) === String(user._id))) {
       target.likesReceived.push(user._id);
     }
 
     const mutual = target.likesSent.some((id) => String(id) === String(user._id));
+
+    if (!isPaidUser) {
+      user.likesTodayCount = (user.likesTodayCount || 0) + 1;
+    }
 
     await user.save();
     await target.save();
@@ -137,10 +178,15 @@ export async function likeUser(req, res) {
         matched: true,
         matchId: match._id,
         message: "It's a match!",
+        likesRemaining: isPaidUser ? null : Math.max(0, FREE_DAILY_LIKE_LIMIT - (user.likesTodayCount || 0)),
       });
     }
 
-    return res.json({ matched: false, message: 'Like sent' });
+    return res.json({
+      matched: false,
+      message: 'Like sent',
+      likesRemaining: isPaidUser ? null : Math.max(0, FREE_DAILY_LIKE_LIMIT - (user.likesTodayCount || 0)),
+    });
   } catch (error) {
     console.error('like user error', error);
     return res.status(500).json({ message: 'Could not like profile' });
@@ -152,7 +198,7 @@ export async function getMyMatches(req, res) {
     const matches = await Match.find({ users: req.user._id })
       .populate({
         path: 'users',
-        select: 'firstName age city photos bio interests intention lastActiveAt',
+        select: 'firstName age city photos bio interests intention lastActiveAt plan',
       })
       .sort({ lastMessageAt: -1, createdAt: -1 });
 
@@ -170,7 +216,21 @@ export async function getMyMatches(req, res) {
 
 export async function getLikesReceived(req, res) {
   try {
-    const currentUser = await User.findById(req.user._id).select('likesReceived');
+    const currentUser = await User.findById(req.user._id).select('plan likesReceived');
+
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const canSeeLikes = currentUser.plan === 'premium' || currentUser.plan === 'pro';
+
+    if (!canSeeLikes) {
+      return res.status(403).json({
+        message: 'Upgrade to Premium to see who liked you',
+        code: 'LIKES_LOCKED',
+      });
+    }
+
     const matches = await Match.find({ users: req.user._id }).select('users');
 
     const matchedUserIds = matches
@@ -186,7 +246,7 @@ export async function getLikesReceived(req, res) {
       _id: { $in: filteredIds },
       onboardingCompleted: true,
     })
-      .select('firstName age city photos bio interests intention lastActiveAt')
+      .select('firstName age city photos bio interests intention lastActiveAt plan')
       .sort({ lastActiveAt: -1 });
 
     return res.json(users);
@@ -272,4 +332,4 @@ export async function deleteProfile(req, res) {
     console.error('delete profile error', error);
     return res.status(500).json({ message: 'Could not delete profile' });
   }
-        }
+}
