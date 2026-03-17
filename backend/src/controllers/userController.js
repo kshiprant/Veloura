@@ -18,6 +18,15 @@ function resetDailyLikeWindowIfNeeded(user) {
   }
 }
 
+function isPaidUser(user) {
+  return user?.plan === 'premium' || user?.plan === 'pro';
+}
+
+function getLikesRemaining(user) {
+  if (isPaidUser(user)) return null;
+  return Math.max(0, FREE_DAILY_LIKE_LIMIT - (user.likesTodayCount || 0));
+}
+
 export async function saveOnboarding(req, res) {
   try {
     const errors = validationResult(req);
@@ -123,12 +132,16 @@ export async function likeUser(req, res) {
     });
 
     if (alreadyMatched) {
-      return res.json({ matched: true, matchId: alreadyMatched._id });
+      return res.json({
+        matched: true,
+        matchId: alreadyMatched._id,
+        likesRemaining: getLikesRemaining(user),
+      });
     }
 
-    const isPaidUser = user.plan === 'premium' || user.plan === 'pro';
+    const paid = isPaidUser(user);
 
-    if (!isPaidUser) {
+    if (!paid) {
       resetDailyLikeWindowIfNeeded(user);
 
       if ((user.likesTodayCount || 0) >= FREE_DAILY_LIKE_LIMIT) {
@@ -144,7 +157,11 @@ export async function likeUser(req, res) {
     }
 
     if (user.likesSent.some((id) => String(id) === String(target._id))) {
-      return res.json({ matched: false, message: 'Like already sent' });
+      return res.json({
+        matched: false,
+        message: 'Like already sent',
+        likesRemaining: getLikesRemaining(user),
+      });
     }
 
     user.likesSent.push(target._id);
@@ -155,7 +172,7 @@ export async function likeUser(req, res) {
 
     const mutual = target.likesSent.some((id) => String(id) === String(user._id));
 
-    if (!isPaidUser) {
+    if (!paid) {
       user.likesTodayCount = (user.likesTodayCount || 0) + 1;
     }
 
@@ -178,14 +195,14 @@ export async function likeUser(req, res) {
         matched: true,
         matchId: match._id,
         message: "It's a match!",
-        likesRemaining: isPaidUser ? null : Math.max(0, FREE_DAILY_LIKE_LIMIT - (user.likesTodayCount || 0)),
+        likesRemaining: getLikesRemaining(user),
       });
     }
 
     return res.json({
       matched: false,
       message: 'Like sent',
-      likesRemaining: isPaidUser ? null : Math.max(0, FREE_DAILY_LIKE_LIMIT - (user.likesTodayCount || 0)),
+      likesRemaining: getLikesRemaining(user),
     });
   } catch (error) {
     console.error('like user error', error);
@@ -222,9 +239,7 @@ export async function getLikesReceived(req, res) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const canSeeLikes = currentUser.plan === 'premium' || currentUser.plan === 'pro';
-
-    if (!canSeeLikes) {
+    if (!isPaidUser(currentUser)) {
       return res.status(403).json({
         message: 'Upgrade to Premium to see who liked you',
         code: 'LIKES_LOCKED',
@@ -332,4 +347,4 @@ export async function deleteProfile(req, res) {
     console.error('delete profile error', error);
     return res.status(500).json({ message: 'Could not delete profile' });
   }
-}
+      }
