@@ -1125,3 +1125,33 @@ p { line-height: 1.6; }
     font-size:28px;
   }
 }
+.premium-pro-hero{
+  border:1px solid rgba(138,21,56,.14);
+}
+
+.premium-pro-pill{
+  background:rgba(39,29,29,.08);
+  color:#271d1d;
+}
+
+.premium-pro-price-card{
+  border-color:rgba(39,29,29,.16);
+}
+
+.plan-compare{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.plan-compare-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:56px;
+  padding:0 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.7);
+  border:1px solid rgba(138,21,56,.08);
+}
