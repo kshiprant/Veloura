@@ -9,6 +9,7 @@ import MatchesPage from './pages/MatchesPage';
 import ProfilePage from './pages/ProfilePage';
 import LikesYouPage from './pages/LikesYouPage';
 import PremiumPage from './pages/PremiumPage';
+import PremiumProPage from './pages/PremiumProPage';
 
 export default function App() {
   return (
