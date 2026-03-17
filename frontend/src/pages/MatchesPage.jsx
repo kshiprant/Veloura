@@ -46,7 +46,7 @@ export default function MatchesPage() {
       setLikesReceived(Array.isArray(data) ? data : []);
       setLikesSupported(true);
     } catch (error) {
-      console.error('Likes received endpoint not ready:', error);
+      console.error('Failed to load likes received:', error);
       setLikesSupported(false);
       setLikesReceived([]);
     } finally {
@@ -82,9 +82,13 @@ export default function MatchesPage() {
     socket?.emit('join_match', activeMatch._id);
 
     const handler = (message) => {
-      if (message.matchId === activeMatch._id) {
-        setMessages((prev) => [...prev, message]);
-      }
+      if (String(message.matchId) !== String(activeMatch._id)) return;
+
+      setMessages((prev) => {
+        const alreadyExists = prev.some((m) => String(m._id) === String(message._id));
+        if (alreadyExists) return prev;
+        return [...prev, message];
+      });
     };
 
     socket?.on('new_message', handler);
@@ -94,12 +98,11 @@ export default function MatchesPage() {
   const send = async () => {
     if (!text.trim() || !activeMatch?._id) return;
 
+    const content = text.trim();
+
     try {
-      const socket = getSocket();
-      socket?.emit('send_message', {
-        matchId: activeMatch._id,
-        content: text.trim(),
-      });
+      const { data } = await api.post(`/messages/${activeMatch._id}`, { content });
+      setMessages((prev) => [...prev, data]);
       setText('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -173,9 +176,9 @@ export default function MatchesPage() {
     if (!likesSupported) {
       return (
         <div className="empty-state-card">
-          <div className="strong">Liked You is not connected yet</div>
+          <div className="strong">Could not load likes</div>
           <div className="muted small-text">
-            Frontend tab is ready. Backend route still needs to be added.
+            Please try again in a moment.
           </div>
         </div>
       );
@@ -250,7 +253,7 @@ export default function MatchesPage() {
           ) : messages.length ? (
             messages.map((message) => {
               const isIncoming =
-                message.sender?._id === activeMatch.otherUser?._id;
+                String(message.sender?._id) === String(activeMatch.otherUser?._id);
 
               return (
                 <div
@@ -344,4 +347,4 @@ export default function MatchesPage() {
       </div>
     </AppShell>
   );
-      }
+}
