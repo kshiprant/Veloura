@@ -3,6 +3,7 @@ import { body } from 'express-validator';
 import auth from '../middleware/auth.js';
 import {
   getDiscovery,
+  getLikesReceived,
   getMyMatches,
   likeUser,
   saveOnboarding,
@@ -27,6 +28,7 @@ router.put(
 
 router.put('/profile', updateProfile);
 router.get('/discovery', getDiscovery);
+router.get('/likes-received', getLikesReceived);
 router.post('/like/:targetUserId', likeUser);
 router.get('/matches', getMyMatches);
 
