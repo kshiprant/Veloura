@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const [editOpen, setEditOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [form, setForm] = useState({
     firstName: '',
@@ -111,6 +112,26 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDeleteProfile = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your profile? This cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await api.delete('/users/profile');
+      localStorage.removeItem('veloura_token');
+      navigate('/login');
+    } catch (error) {
+      console.error('Delete profile failed:', error);
+      alert(error?.response?.data?.message || 'Failed to delete profile');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <AppShell>
       <div className="stack gap16">
@@ -171,28 +192,6 @@ export default function ProfilePage() {
           </div>
 
           <div className="quick-action-grid">
-            <button
-              className="quick-action-card"
-              onClick={() => navigate('/matches')}
-            >
-              <div className="quick-action-icon">♡</div>
-              <div className="quick-action-text">
-                <div className="quick-action-title">Liked You</div>
-                <div className="quick-action-subtitle">See who is interested</div>
-              </div>
-            </button>
-
-            <button
-              className="quick-action-card"
-              onClick={() => navigate('/matches')}
-            >
-              <div className="quick-action-icon">✉</div>
-              <div className="quick-action-text">
-                <div className="quick-action-title">Chats</div>
-                <div className="quick-action-subtitle">Open your conversations</div>
-              </div>
-            </button>
-
             <button
               className="quick-action-card quick-action-card-wide"
               onClick={() => setSettingsOpen(true)}
@@ -349,8 +348,19 @@ export default function ProfilePage() {
               </div>
 
               <div className="settings-block">
+                <div className="settings-label">Danger Zone</div>
+                <button
+                  className="button outline dangerish"
+                  onClick={handleDeleteProfile}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting...' : 'Delete Profile'}
+                </button>
+              </div>
+
+              <div className="settings-block">
                 <div className="settings-label">Session</div>
-                <button className="button outline dangerish" onClick={logout}>
+                <button className="button outline" onClick={logout}>
                   Logout
                 </button>
               </div>
