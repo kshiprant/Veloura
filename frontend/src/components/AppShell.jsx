@@ -8,20 +8,36 @@ export default function AppShell({ children }) {
       <main className="page-wrap">{children}</main>
 
       <nav className="bottom-nav">
-        <Link className={location.pathname === '/discover' ? 'active' : ''} to="/discover">
-          Discover
+        <Link
+          to="/discover"
+          className={`nav-item ${location.pathname === '/discover' ? 'active' : ''}`}
+        >
+          <span className="nav-icon">⬤</span>
+          <span className="nav-label">Discover</span>
         </Link>
 
-        <Link className={location.pathname === '/likes-you' ? 'active' : ''} to="/likes-you">
-          Likes
+        <Link
+          to="/likes-you"
+          className={`nav-item ${location.pathname === '/likes-you' ? 'active' : ''}`}
+        >
+          <span className="nav-icon">❤</span>
+          <span className="nav-label">Likes</span>
         </Link>
 
-        <Link className={location.pathname === '/matches' ? 'active' : ''} to="/matches">
-          Matches
+        <Link
+          to="/matches"
+          className={`nav-item ${location.pathname === '/matches' ? 'active' : ''}`}
+        >
+          <span className="nav-icon">💬</span>
+          <span className="nav-label">Matches</span>
         </Link>
 
-        <Link className={location.pathname === '/profile' ? 'active' : ''} to="/profile">
-          Profile
+        <Link
+          to="/profile"
+          className={`nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
+        >
+          <span className="nav-icon">👤</span>
+          <span className="nav-label">Profile</span>
         </Link>
       </nav>
     </div>
