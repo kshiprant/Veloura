@@ -1,12 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppShell from '../components/AppShell';
 import api from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 export default function DiscoverPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+  const [likeLimitReached, setLikeLimitReached] = useState(false);
+
+  const isPremium = user?.plan === 'premium';
+  const isPro = user?.plan === 'pro';
+  const isFree = !isPremium && !isPro;
+
+  const planLabel = useMemo(() => {
+    if (isPro) return 'Premium Pro';
+    if (isPremium) return 'Premium';
+    return 'Free';
+  }, [isPremium, isPro]);
 
   const load = async () => {
     try {
@@ -29,13 +45,25 @@ export default function DiscoverPage() {
 
   const like = async (id) => {
     try {
+      setLikeLimitReached(false);
+
       const { data } = await api.post(`/users/like/${id}`);
+
       setNotice(data.message || (data.matched ? "It's a match!" : 'Like sent'));
       setProfiles((prev) => prev.filter((p) => p._id !== id));
       setTimeout(() => setNotice(''), 2500);
     } catch (err) {
       console.error('Like failed:', err);
-      setNotice(err?.response?.data?.message || 'Could not send like');
+
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message || 'Could not send like';
+
+      setNotice(message);
+
+      if (status === 403 || status === 429) {
+        setLikeLimitReached(true);
+      }
+
       setTimeout(() => setNotice(''), 2500);
     }
   };
@@ -46,9 +74,55 @@ export default function DiscoverPage() {
     <AppShell>
       <div className="stack gap16">
         <div className="row between center">
-          <h2>Discover</h2>
+          <div>
+            <h2>Discover</h2>
+            <div className="muted small-text">Your plan: {planLabel}</div>
+          </div>
           {notice ? <div className="success-pill">{notice}</div> : null}
         </div>
+
+        {isFree ? (
+          <div className="soft-card discover-plan-banner">
+            <div className="discover-plan-copy">
+              <div className="strong">Free plan</div>
+              <div className="muted small-text">
+                Daily likes are limited. Upgrade to Premium for unlimited likes and to see who liked you.
+              </div>
+            </div>
+
+            <button
+              className="button outline small"
+              onClick={() => navigate('/premium')}
+            >
+              Upgrade
+            </button>
+          </div>
+        ) : null}
+
+        {likeLimitReached && isFree ? (
+          <div className="soft-card discover-lock-card">
+            <h3>Daily like limit reached</h3>
+            <p className="muted">
+              Upgrade to Premium to continue liking without limits and unlock Likes You.
+            </p>
+
+            <div className="footer-actions no-top">
+              <button
+                className="button outline half"
+                onClick={() => navigate('/premium')}
+              >
+                Get Premium
+              </button>
+
+              <button
+                className="button primary half"
+                onClick={() => navigate('/premium-pro')}
+              >
+                Get Pro
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         {loading ? <div className="soft-card">Loading profiles...</div> : null}
 
@@ -67,24 +141,35 @@ export default function DiscoverPage() {
               alt={current.firstName}
               className="hero-image"
             />
+
             <div className="profile-body">
-              <h1>{current.firstName}, {current.age}</h1>
-              <div className="muted">{current.city} • {current.intention}</div>
+              <h1>
+                {current.firstName}, {current.age}
+              </h1>
+
+              <div className="muted">
+                {current.city} • {current.intention}
+              </div>
+
               <p>{current.bio || 'No bio yet.'}</p>
 
               <div className="chip-grid">
                 {(current.interests || []).map((item) => (
-                  <span key={item} className="chip-tag">{item}</span>
+                  <span key={item} className="chip-tag">
+                    {item}
+                  </span>
                 ))}
               </div>
 
               <div className="stack gap12 top16">
-                {(current.prompts || []).filter((p) => p.answer).map((p) => (
-                  <div key={p.question} className="prompt-card small">
-                    <div className="prompt-title">{p.question}</div>
-                    <p>{p.answer}</p>
-                  </div>
-                ))}
+                {(current.prompts || [])
+                  .filter((p) => p.answer)
+                  .map((p) => (
+                    <div key={p.question} className="prompt-card small">
+                      <div className="prompt-title">{p.question}</div>
+                      <p>{p.answer}</p>
+                    </div>
+                  ))}
               </div>
             </div>
 
@@ -95,11 +180,13 @@ export default function DiscoverPage() {
               >
                 Pass
               </button>
+
               <button
                 className="button primary half"
                 onClick={() => like(current._id)}
+                disabled={likeLimitReached && isFree}
               >
-                Like
+                {likeLimitReached && isFree ? 'Limit Reached' : 'Like'}
               </button>
             </div>
           </div>
