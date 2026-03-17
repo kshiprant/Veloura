@@ -327,12 +327,24 @@ export default function ProfilePage() {
                     <span className="settings-arrow">›</span>
                   </button>
 
-                  <button className="settings-row">
+                  <button
+                    className="settings-row"
+                    onClick={() => {
+                      setSettingsOpen(false);
+                      navigate('/settings/notifications');
+                    }}
+                  >
                     <span>Notifications</span>
                     <span className="settings-arrow">›</span>
                   </button>
 
-                  <button className="settings-row">
+                  <button
+                    className="settings-row"
+                    onClick={() => {
+                      setSettingsOpen(false);
+                      navigate('/settings/privacy-safety');
+                    }}
+                  >
                     <span>Privacy &amp; Safety</span>
                     <span className="settings-arrow">›</span>
                   </button>
@@ -351,7 +363,13 @@ export default function ProfilePage() {
                       Unlock more visibility, advanced filters, and stronger matching features.
                     </p>
 
-                    <button className="button primary premium-cta">
+                    <button
+                      className="button primary premium-cta"
+                      onClick={() => {
+                        setSettingsOpen(false);
+                        navigate('/premium');
+                      }}
+                    >
                       Upgrade to Premium
                     </button>
                   </div>
@@ -366,7 +384,13 @@ export default function ProfilePage() {
                       Priority placement, better reach, premium boosts, and elite profile advantages.
                     </p>
 
-                    <button className="button primary premium-cta">
+                    <button
+                      className="button primary premium-cta"
+                      onClick={() => {
+                        setSettingsOpen(false);
+                        navigate('/premium-pro');
+                      }}
+                    >
                       Get Pro Pack
                     </button>
                   </div>
