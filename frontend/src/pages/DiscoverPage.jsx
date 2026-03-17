@@ -4,6 +4,8 @@ import AppShell from '../components/AppShell';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
+const FREE_DAILY_LIKE_LIMIT = 15;
+
 export default function DiscoverPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -13,6 +15,9 @@ export default function DiscoverPage() {
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [likeLimitReached, setLikeLimitReached] = useState(false);
+  const [likesRemaining, setLikesRemaining] = useState(
+    user?.plan === 'free' || !user?.plan ? FREE_DAILY_LIKE_LIMIT : null
+  );
 
   const isPremium = user?.plan === 'premium';
   const isPro = user?.plan === 'pro';
@@ -43,6 +48,18 @@ export default function DiscoverPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!isFree) {
+      setLikesRemaining(null);
+      setLikeLimitReached(false);
+      return;
+    }
+
+    if (typeof likesRemaining === 'number' && likesRemaining <= 0) {
+      setLikeLimitReached(true);
+    }
+  }, [isFree, likesRemaining]);
+
   const like = async (id) => {
     try {
       setLikeLimitReached(false);
@@ -51,14 +68,27 @@ export default function DiscoverPage() {
 
       setNotice(data.message || (data.matched ? "It's a match!" : 'Like sent'));
       setProfiles((prev) => prev.filter((p) => p._id !== id));
+
+      if (isFree && typeof data?.likesRemaining === 'number') {
+        setLikesRemaining(data.likesRemaining);
+        if (data.likesRemaining <= 0) {
+          setLikeLimitReached(true);
+        }
+      }
+
       setTimeout(() => setNotice(''), 2500);
     } catch (err) {
       console.error('Like failed:', err);
 
       const status = err?.response?.status;
       const message = err?.response?.data?.message || 'Could not send like';
+      const remaining = err?.response?.data?.likesRemaining;
 
       setNotice(message);
+
+      if (typeof remaining === 'number') {
+        setLikesRemaining(remaining);
+      }
 
       if (status === 403 || status === 429) {
         setLikeLimitReached(true);
@@ -87,6 +117,12 @@ export default function DiscoverPage() {
               <div className="strong">Free plan</div>
               <div className="muted small-text">
                 Daily likes are limited. Upgrade to Premium for unlimited likes and to see who liked you.
+              </div>
+              <div className="discover-likes-count">
+                Likes left today:{' '}
+                <span className="strong">
+                  {typeof likesRemaining === 'number' ? likesRemaining : FREE_DAILY_LIKE_LIMIT}
+                </span>
               </div>
             </div>
 
