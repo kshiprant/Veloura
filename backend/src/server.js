@@ -11,6 +11,7 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import billingRoutes from './routes/billing.js';
 import Message from './models/Message.js';
 import Match from './models/Match.js';
 
@@ -53,6 +54,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/billing', billingRoutes);
 
 io.use((socket, next) => {
   try {
