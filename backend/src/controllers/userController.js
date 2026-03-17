@@ -1,6 +1,7 @@
 import { validationResult } from 'express-validator';
 import User from '../models/User.js';
 import Match from '../models/Match.js';
+import Message from '../models/Message.js';
 
 export async function saveOnboarding(req, res) {
   try {
@@ -220,5 +221,42 @@ export async function uploadProfilePhoto(req, res) {
   } catch (error) {
     console.error('upload profile photo error', error);
     return res.status(500).json({ message: 'Could not upload photo' });
+  }
+}
+
+export async function deleteProfile(req, res) {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).select('_id matches');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const matches = await Match.find({ users: userId }).select('_id');
+    const matchIds = matches.map((match) => match._id);
+
+    if (matchIds.length) {
+      await Message.deleteMany({ matchId: { $in: matchIds } });
+      await Match.deleteMany({ _id: { $in: matchIds } });
+    }
+
+    await User.updateMany(
+      { _id: { $ne: userId } },
+      {
+        $pull: {
+          likesSent: userId,
+          likesReceived: userId,
+          matches: { $in: matchIds },
+        },
+      }
+    );
+
+    await User.findByIdAndDelete(userId);
+
+    return res.json({ message: 'Profile deleted successfully' });
+  } catch (error) {
+    console.error('delete profile error', error);
+    return res.status(500).json({ message: 'Could not delete profile' });
   }
 }
