@@ -26,6 +26,24 @@ const userSchema = new mongoose.Schema(
       default: ''
     },
     onboardingCompleted: { type: Boolean, default: false },
+
+    plan: {
+      type: String,
+      enum: ['free', 'premium', 'pro'],
+      default: 'free'
+    },
+
+    subscription: {
+      provider: { type: String, default: '' },
+      status: { type: String, default: '' },
+      billingCycle: { type: String, default: '' },
+      paymentMethod: { type: String, default: '' },
+      amount: { type: Number, default: 0 },
+      startedAt: { type: Date },
+      expiresAt: { type: Date },
+      autoRenew: { type: Boolean, default: false }
+    },
+
     likesSent: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     likesReceived: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Match' }],
