@@ -58,7 +58,9 @@ export async function getDiscovery(req, res) {
   try {
     const currentUser = await User.findById(req.user._id).select('likesSent');
     const matches = await Match.find({ users: req.user._id }).select('users');
-    const matchedUserIds = matches.flatMap((m) => m.users).filter((id) => String(id) !== String(req.user._id));
+    const matchedUserIds = matches
+      .flatMap((m) => m.users)
+      .filter((id) => String(id) !== String(req.user._id));
 
     const excludeIds = [currentUser._id, ...currentUser.likesSent, ...matchedUserIds];
 
@@ -99,6 +101,7 @@ export async function likeUser(req, res) {
     if (!user.likesSent.some((id) => String(id) === String(target._id))) {
       user.likesSent.push(target._id);
     }
+
     if (!target.likesReceived.some((id) => String(id) === String(user._id))) {
       target.likesReceived.push(user._id);
     }
@@ -109,12 +112,22 @@ export async function likeUser(req, res) {
     await target.save();
 
     if (mutual) {
-      const match = await Match.create({ users: [user._id, target._id], createdBy: user._id });
+      const match = await Match.create({
+        users: [user._id, target._id],
+        createdBy: user._id
+      });
+
       user.matches.push(match._id);
       target.matches.push(match._id);
+
       await user.save();
       await target.save();
-      return res.json({ matched: true, matchId: match._id, message: "It's a match!" });
+
+      return res.json({
+        matched: true,
+        matchId: match._id,
+        message: "It's a match!"
+      });
     }
 
     return res.json({ matched: false, message: 'Like sent' });
@@ -142,5 +155,23 @@ export async function getMyMatches(req, res) {
   } catch (error) {
     console.error('get matches error', error);
     return res.status(500).json({ message: 'Could not load matches' });
+  }
+}
+
+export async function getLikesReceived(req, res) {
+  try {
+    const currentUser = await User.findById(req.user._id).select('likesReceived');
+
+    const users = await User.find({
+      _id: { $in: currentUser.likesReceived },
+      onboardingCompleted: true
+    })
+      .select('firstName age city photos bio interests intention lastActiveAt')
+      .sort({ lastActiveAt: -1 });
+
+    return res.json(users);
+  } catch (error) {
+    console.error('get likes received error', error);
+    return res.status(500).json({ message: 'Could not load likes received' });
   }
 }
