@@ -63,12 +63,22 @@ export default function App() {
         }
       />
 
-      {/* 👇 ADD THIS */}
+      {/* Premium */}
       <Route
         path="/premium"
         element={
           <ProtectedRoute>
             <PremiumPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 👇 ADD THIS (missing earlier) */}
+      <Route
+        path="/premium-pro"
+        element={
+          <ProtectedRoute>
+            <PremiumProPage />
           </ProtectedRoute>
         }
       />
