@@ -42,9 +42,6 @@ export default function MatchesPage() {
   const loadLikesReceived = async () => {
     try {
       setLoadingLikes(true);
-
-      // This requires backend support.
-      // If route is missing, we gracefully disable the likes tab content.
       const { data } = await api.get('/users/likes-received');
       setLikesReceived(Array.isArray(data) ? data : []);
       setLikesSupported(true);
@@ -197,28 +194,25 @@ export default function MatchesPage() {
 
     return (
       <div className="stack gap12 top12">
-        {likesReceived.map((entry) => {
-          const person = entry?.user || entry?.fromUser || entry;
-          return (
-            <div key={entry?._id || person?._id} className="match-row-card">
-              <div className="match-row match-row-main static-row">
-                <img
-                  src={person?.photos?.[0] || 'https://placehold.co/80x80?text=V'}
-                  alt="avatar"
-                />
-                <div className="match-row-content">
-                  <div className="strong">{person?.firstName || 'User'}</div>
-                  <div className="muted small-text">
-                    {person?.city || 'Location hidden'}
-                  </div>
-                  <div className="muted small-text">
-                    {person?.intention || 'No intention set'}
-                  </div>
+        {likesReceived.map((person) => (
+          <div key={person._id} className="match-row-card">
+            <div className="match-row match-row-main static-row">
+              <img
+                src={person?.photos?.[0] || 'https://placehold.co/80x80?text=V'}
+                alt="avatar"
+              />
+              <div className="match-row-content">
+                <div className="strong">{person?.firstName || 'User'}</div>
+                <div className="muted small-text">
+                  {person?.city || 'Location hidden'}
+                </div>
+                <div className="muted small-text">
+                  {person?.intention || 'No intention set'}
                 </div>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     );
   }, [likesReceived, loadingLikes, likesSupported]);
@@ -350,4 +344,4 @@ export default function MatchesPage() {
       </div>
     </AppShell>
   );
-                                        }
+      }
