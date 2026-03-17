@@ -16,6 +16,22 @@ const userSchema = new mongoose.Schema(
     age: { type: Number, min: 18, max: 100 },
     gender: { type: String, enum: ['Man', 'Woman', 'Non-binary', ''], default: '' },
     city: { type: String, trim: true, default: '' },
+
+    location: {
+      city: { type: String, trim: true, default: '' },
+      coordinates: {
+        lat: { type: Number },
+        lng: { type: Number },
+      },
+      source: {
+        type: String,
+        enum: ['manual', 'gps', ''],
+        default: '',
+      },
+    },
+
+    showDistance: { type: Boolean, default: true },
+
     bio: { type: String, maxlength: 500, default: '' },
     photos: [{ type: String }],
     interests: [{ type: String }],
