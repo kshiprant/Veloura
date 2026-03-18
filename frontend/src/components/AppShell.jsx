@@ -28,7 +28,7 @@ export default function AppShell({ children }) {
           to="/matches"
           className={`nav-item ${location.pathname === '/matches' ? 'active' : ''}`}
         >
-          <span className="nav-icon">◍</span>
+          <span className="nav-icon">◎</span>
           <span className="nav-label">Matches</span>
         </Link>
 
