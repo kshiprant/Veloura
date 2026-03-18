@@ -1336,3 +1336,14 @@ p { line-height: 1.6; }
 .nav-item {
   gap: 4px;
 }
+.nav-icon {
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+}
+.nav-item:nth-child(3) .nav-icon {
+  transform: translateY(-1px);
+}
