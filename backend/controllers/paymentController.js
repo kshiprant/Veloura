@@ -1,12 +1,12 @@
-import razorpay from '../config/razorpay.js';
+import razorpay from '../../config/razorpay.js';
 
 export async function createOrder(req, res) {
   try {
     const { plan } = req.body;
 
     const amountMap = {
-      premium: 19900, // ₹199
-      pro: 49900,     // ₹499
+      premium: 19900,
+      pro: 49900,
     };
 
     const amount = amountMap[plan];
