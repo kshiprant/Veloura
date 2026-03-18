@@ -20,7 +20,7 @@ const PLAN_META = {
 export default function CheckoutPage() {
   const { plan } = useParams();
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { user, setUser } = useAuth();
 
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [paymentMethod, setPaymentMethod] = useState('upi');
@@ -62,8 +62,8 @@ export default function CheckoutPage() {
         description: `${meta.title} - ${billingCycle}`,
         order_id: order.id,
         prefill: {
-          name: userSafeName(),
-          email: userSafeEmail(),
+          name: user?.firstName || '',
+          email: user?.email || '',
         },
         theme: {
           color: '#8a1538',
@@ -73,7 +73,6 @@ export default function CheckoutPage() {
             const { data } = await api.post('/payments/verify', {
               plan: planKey,
               billingCycle,
-              amount,
               paymentMethod,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -84,11 +83,13 @@ export default function CheckoutPage() {
               setUser(data.user);
             }
 
-            alert('Payment successful');
+            alert('Payment verified successfully');
             navigate('/profile');
           } catch (error) {
             console.error('Verification failed:', error);
             alert(error?.response?.data?.message || 'Payment verification failed');
+          } finally {
+            setProcessing(false);
           }
         },
         modal: {
@@ -112,14 +113,6 @@ export default function CheckoutPage() {
       setProcessing(false);
     }
   };
-
-  function userSafeName() {
-    return 'Veloura User';
-  }
-
-  function userSafeEmail() {
-    return '';
-  }
 
   return (
     <AppShell>
@@ -234,7 +227,7 @@ export default function CheckoutPage() {
           </button>
 
           <div className="muted small-text top16 subtle-center">
-            Secure test payment via Razorpay
+            Secure payment via Razorpay
           </div>
         </div>
       </div>
