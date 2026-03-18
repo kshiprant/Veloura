@@ -1305,3 +1305,26 @@ p { line-height: 1.6; }
   background: rgba(255,255,255,0.12);
   color: #fff;
 }
+.bottom-nav {
+  background: #1f1a17; /* keep your dark theme */
+}
+
+.nav-item {
+  color: white !important;
+}
+
+.nav-item .nav-icon {
+  color: white !important;
+}
+
+.nav-item.active {
+  color: white !important;
+}
+
+.nav-item.active .nav-icon {
+  color: white !important;
+}
+
+.nav-label {
+  color: white !important;
+}
