@@ -7,13 +7,13 @@ import { useAuth } from '../context/AuthContext';
 const PLAN_META = {
   premium: {
     title: 'Veloura Premium',
-    monthly: 299,
-    yearly: 1999,
+    monthly: 149,
+    yearly: 999,
   },
   pro: {
     title: 'Veloura Premium Pro',
-    monthly: 599,
-    yearly: 3999,
+    monthly: 249,
+    yearly: 1799,
   },
 };
 
