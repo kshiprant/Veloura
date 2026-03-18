@@ -28,13 +28,13 @@ export default function PremiumProPage() {
           <div className="premium-price-block top24">
             <div className="premium-price-card">
               <div className="premium-price-label">Monthly</div>
-              <div className="premium-price">₹599</div>
+              <div className="premium-price">₹249</div>
               <div className="muted small-text">Billed every month</div>
             </div>
 
             <div className="premium-price-card premium-price-card-highlight premium-pro-price-card">
               <div className="premium-price-label">Yearly</div>
-              <div className="premium-price">₹3999</div>
+              <div className="premium-price">₹1799</div>
               <div className="muted small-text">Best Pro value</div>
             </div>
           </div>
