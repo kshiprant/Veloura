@@ -45,29 +45,81 @@ export default function CheckoutPage() {
     );
   }
 
-  const handleMockPayment = async () => {
-    setProcessing(true);
-
+  const handlePayment = async () => {
     try {
-      const { data } = await api.post('/billing/checkout/mock-complete', {
+      setProcessing(true);
+
+      const { data: order } = await api.post('/payments/create-order', {
         plan: planKey,
         billingCycle,
-        paymentMethod,
-        amount,
       });
 
-      if (data?.user) {
-        setUser(data.user);
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency || 'INR',
+        name: 'Veloura',
+        description: `${meta.title} - ${billingCycle}`,
+        order_id: order.id,
+        prefill: {
+          name: userSafeName(),
+          email: userSafeEmail(),
+        },
+        theme: {
+          color: '#8a1538',
+        },
+        handler: async function (response) {
+          try {
+            const { data } = await api.post('/payments/verify', {
+              plan: planKey,
+              billingCycle,
+              amount,
+              paymentMethod,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            if (data?.user) {
+              setUser(data.user);
+            }
+
+            alert('Payment successful');
+            navigate('/profile');
+          } catch (error) {
+            console.error('Verification failed:', error);
+            alert(error?.response?.data?.message || 'Payment verification failed');
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setProcessing(false);
+          },
+        },
+      };
+
+      if (!window.Razorpay) {
+        alert('Razorpay SDK failed to load');
+        setProcessing(false);
+        return;
       }
 
-      navigate('/profile');
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (error) {
       console.error('Payment failed:', error);
       alert(error?.response?.data?.message || 'Payment failed');
-    } finally {
       setProcessing(false);
     }
   };
+
+  function userSafeName() {
+    return 'Veloura User';
+  }
+
+  function userSafeEmail() {
+    return '';
+  }
 
   return (
     <AppShell>
@@ -175,14 +227,14 @@ export default function CheckoutPage() {
 
           <button
             className="button primary checkout-pay-button top24"
-            onClick={handleMockPayment}
+            onClick={handlePayment}
             disabled={processing}
           >
             {processing ? 'Processing...' : `Pay ₹${amount}`}
           </button>
 
           <div className="muted small-text top16 subtle-center">
-            This is a mock checkout flow for now. Real gateway integration can replace this handler later.
+            Secure test payment via Razorpay
           </div>
         </div>
       </div>
