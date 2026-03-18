@@ -5,12 +5,12 @@ import User from '../models/User.js';
 function getPlanAmount(plan, billingCycle = 'monthly') {
   const priceMap = {
     premium: {
-      monthly: 29900,
-      yearly: 199900,
+      monthly: 14900,
+      yearly: 99900,
     },
     pro: {
-      monthly: 59900,
-      yearly: 399900,
+      monthly: 24900,
+      yearly: 179900,
     },
   };
 
