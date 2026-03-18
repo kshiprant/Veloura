@@ -12,7 +12,7 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import billingRoutes from './routes/billing.js';
-import paymentRoutes from './routes/paymentRoutes.js';
+import paymentRoutes from '../routes/paymentRoutes.js';
 import Message from './models/Message.js';
 import Match from './models/Match.js';
 
@@ -43,7 +43,6 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 
-// serves uploaded images publicly
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 const io = new Server(server, {
