@@ -12,8 +12,11 @@ export default function ProfilePage() {
 
   const [editOpen, setEditOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [savingLocation, setSavingLocation] = useState(false);
 
   const [form, setForm] = useState({
     firstName: '',
@@ -24,8 +27,14 @@ export default function ProfilePage() {
     interests: '',
   });
 
+  const [locationForm, setLocationForm] = useState({
+    city: '',
+    showDistance: true,
+  });
+
   const [selectedPhotoFile, setSelectedPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
+  const [locationNotice, setLocationNotice] = useState('');
 
   useEffect(() => {
     setForm({
@@ -35,6 +44,11 @@ export default function ProfilePage() {
       bio: user?.bio || '',
       intention: user?.intention || '',
       interests: (user?.interests || []).join(', '),
+    });
+
+    setLocationForm({
+      city: user?.location?.city || user?.city || '',
+      showDistance: user?.showDistance ?? true,
     });
 
     setPhotoPreview(user?.photos?.[0] || '');
@@ -110,6 +124,74 @@ export default function ProfilePage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const saveManualLocation = async () => {
+    setSavingLocation(true);
+    setLocationNotice('');
+
+    try {
+      const payload = {
+        city: locationForm.city.trim(),
+        location: {
+          city: locationForm.city.trim(),
+          source: 'manual',
+        },
+        showDistance: locationForm.showDistance,
+      };
+
+      const { data } = await api.put('/users/profile', payload);
+      setUser(data);
+      setLocationNotice('Location saved');
+    } catch (error) {
+      console.error('Save manual location failed:', error);
+      setLocationNotice(error?.response?.data?.message || 'Failed to save location');
+    } finally {
+      setSavingLocation(false);
+    }
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationNotice('Geolocation is not supported on this device');
+      return;
+    }
+
+    setDetectingLocation(true);
+    setLocationNotice('');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const payload = {
+            city: locationForm.city.trim() || user?.city || '',
+            location: {
+              city: locationForm.city.trim() || user?.city || '',
+              coordinates: {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              },
+              source: 'gps',
+            },
+            showDistance: locationForm.showDistance,
+          };
+
+          const { data } = await api.put('/users/profile', payload);
+          setUser(data);
+          setLocationNotice('GPS location updated');
+        } catch (error) {
+          console.error('GPS update failed:', error);
+          setLocationNotice(error?.response?.data?.message || 'Failed to update GPS location');
+        } finally {
+          setDetectingLocation(false);
+        }
+      },
+      () => {
+        setDetectingLocation(false);
+        setLocationNotice('Location permission denied or unavailable');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const handleDeleteProfile = async () => {
@@ -329,6 +411,65 @@ export default function ProfilePage() {
 
                   <button
                     className="settings-row"
+                    onClick={() => setLocationOpen((prev) => !prev)}
+                  >
+                    <span>Location</span>
+                    <span className="settings-arrow">{locationOpen ? '⌄' : '›'}</span>
+                  </button>
+
+                  {locationOpen ? (
+                    <div className="settings-location-card">
+                      <div className="stack gap12">
+                        <input
+                          value={locationForm.city}
+                          onChange={(e) =>
+                            setLocationForm((prev) => ({
+                              ...prev,
+                              city: e.target.value,
+                            }))
+                          }
+                          placeholder="Enter your city"
+                        />
+
+                        <label className="settings-toggle-row">
+                          <span>Show distance in discover</span>
+                          <input
+                            type="checkbox"
+                            checked={locationForm.showDistance}
+                            onChange={(e) =>
+                              setLocationForm((prev) => ({
+                                ...prev,
+                                showDistance: e.target.checked,
+                              }))
+                            }
+                          />
+                        </label>
+
+                        <button
+                          className="button outline"
+                          onClick={useCurrentLocation}
+                          disabled={detectingLocation}
+                        >
+                          {detectingLocation ? 'Detecting...' : 'Use Current Location'}
+                        </button>
+
+                        <button
+                          className="button primary"
+                          onClick={saveManualLocation}
+                          disabled={savingLocation}
+                        >
+                          {savingLocation ? 'Saving...' : 'Save Location'}
+                        </button>
+
+                        {locationNotice ? (
+                          <div className="muted small-text">{locationNotice}</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <button
+                    className="settings-row"
                     onClick={() => {
                       setSettingsOpen(false);
                       navigate('/settings/notifications');
@@ -422,4 +563,4 @@ export default function ProfilePage() {
       ) : null}
     </AppShell>
   );
-}
+            }
