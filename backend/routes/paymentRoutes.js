@@ -1,5 +1,5 @@
 import express from 'express';
-import auth from '../middleware/auth.js';
+import auth from '../src/middleware/auth.js';
 import { createOrder } from '../controllers/paymentController.js';
 
 const router = express.Router();
