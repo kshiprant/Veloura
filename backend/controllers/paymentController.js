@@ -2,11 +2,11 @@ import razorpay from '../../config/razorpay.js';
 
 export async function createOrder(req, res) {
   try {
-    const { plan } = req.body;
+    const { plan, billingCycle = 'monthly' } = req.body;
 
     const amountMap = {
-      premium: 19900,
-      pro: 49900,
+      premium: billingCycle === 'yearly' ? 99900 : 14900,
+      pro: billingCycle === 'yearly' ? 179900 : 24900,
     };
 
     const amount = amountMap[plan];
@@ -18,7 +18,7 @@ export async function createOrder(req, res) {
     const order = await razorpay.orders.create({
       amount,
       currency: 'INR',
-      receipt: `receipt_${Date.now()}`,
+      receipt: `receipt_${plan}_${billingCycle}_${Date.now()}`,
     });
 
     res.json(order);
