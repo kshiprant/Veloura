@@ -1328,3 +1328,11 @@ p { line-height: 1.6; }
 .nav-label {
   color: white !important;
 }
+.nav-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.nav-item {
+  gap: 4px;
+}
