@@ -12,6 +12,7 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import billingRoutes from './routes/billing.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 import Message from './models/Message.js';
 import Match from './models/Match.js';
 
@@ -55,6 +56,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/payments', paymentRoutes);
 
 io.use((socket, next) => {
   try {
