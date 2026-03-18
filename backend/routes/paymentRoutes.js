@@ -4,6 +4,14 @@ import { createOrder } from '../controllers/paymentController.js';
 
 const router = express.Router();
 
-router.post('/create-order', auth, createOrder);
+// Create Razorpay order
+router.post('/create-order', auth, async (req, res, next) => {
+  try {
+    await createOrder(req, res);
+  } catch (error) {
+    console.error('create-order route error:', error);
+    next(error);
+  }
+});
 
 export default router;
