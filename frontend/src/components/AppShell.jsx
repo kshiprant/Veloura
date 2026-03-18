@@ -12,7 +12,7 @@ export default function AppShell({ children }) {
           to="/discover"
           className={`nav-item ${location.pathname === '/discover' ? 'active' : ''}`}
         >
-          <span className="nav-icon">⬤</span>
+          <span className="nav-icon">○</span>
           <span className="nav-label">Discover</span>
         </Link>
 
@@ -20,7 +20,7 @@ export default function AppShell({ children }) {
           to="/likes-you"
           className={`nav-item ${location.pathname === '/likes-you' ? 'active' : ''}`}
         >
-          <span className="nav-icon">❤</span>
+          <span className="nav-icon">♡</span>
           <span className="nav-label">Likes</span>
         </Link>
 
@@ -28,7 +28,7 @@ export default function AppShell({ children }) {
           to="/matches"
           className={`nav-item ${location.pathname === '/matches' ? 'active' : ''}`}
         >
-          <span className="nav-icon">💬</span>
+          <span className="nav-icon">◔</span>
           <span className="nav-label">Matches</span>
         </Link>
 
@@ -36,7 +36,7 @@ export default function AppShell({ children }) {
           to="/profile"
           className={`nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
         >
-          <span className="nav-icon">👤</span>
+          <span className="nav-icon">◉</span>
           <span className="nav-label">Profile</span>
         </Link>
       </nav>
