@@ -8,6 +8,7 @@ import DiscoverPage from './pages/DiscoverPage';
 import MatchesPage from './pages/MatchesPage';
 import ProfilePage from './pages/ProfilePage';
 import LikesYouPage from './pages/LikesYouPage';
+import SparkPage from './pages/SparkPage';
 import PremiumPage from './pages/PremiumPage';
 import PremiumProPage from './pages/PremiumProPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -53,6 +54,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <LikesYouPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/spark"
+        element={
+          <ProtectedRoute>
+            <SparkPage />
           </ProtectedRoute>
         }
       />
