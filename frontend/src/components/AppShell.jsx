@@ -17,14 +17,6 @@ export default function AppShell({ children }) {
         </Link>
 
         <Link
-          to="/likes-you"
-          className={`nav-item ${location.pathname === '/likes-you' ? 'active' : ''}`}
-        >
-          <span className="nav-icon">♡</span>
-          <span className="nav-label">Likes</span>
-        </Link>
-
-        <Link
           to="/spark"
           className={`nav-item ${location.pathname === '/spark' ? 'active' : ''}`}
         >
