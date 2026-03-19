@@ -64,6 +64,11 @@ const userSchema = new mongoose.Schema(
     likesReceived: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     likesTodayCount: { type: Number, default: 0 },
     likesResetAt: { type: Date },
+
+    // Conversation Mode daily limit
+    conversationSessionsUsed: { type: Number, default: 0 },
+    conversationSessionResetAt: { type: Date, default: null },
+
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Match' }],
     lastActiveAt: { type: Date, default: Date.now }
   },
