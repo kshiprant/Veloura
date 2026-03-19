@@ -1488,3 +1488,23 @@ p { line-height: 1.6; }
   justify-content: flex-end;
   margin-top: 8px;
 }
+/* ===== SPARK DOMINANCE ===== */
+
+.nav-item.spark {
+  position: relative;
+  transform: translateY(-14px); /* lift it above others */
+}
+
+.nav-item.spark .nav-icon {
+  background: linear-gradient(135deg, #b31257, #8a1538);
+  color: #fff;
+  padding: 14px;
+  border-radius: 50%;
+  font-size: 20px;
+  box-shadow: 0 10px 25px rgba(138,21,56,0.4);
+}
+
+/* Remove background box effect for Spark active */
+.nav-item.spark.active {
+  background: transparent;
+}
