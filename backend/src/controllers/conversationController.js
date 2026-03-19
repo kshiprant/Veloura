@@ -40,7 +40,11 @@ async function resetConversationLimitIfNeeded(user) {
 }
 
 function canReveal(session) {
-  const counts = Object.fromEntries(session.userMessageCounts || []);
+  const counts =
+    session.userMessageCounts instanceof Map
+      ? Object.fromEntries(session.userMessageCounts)
+      : session.userMessageCounts || {};
+
   const values = Object.values(counts);
   return session.totalMessages >= 7 && values.filter((count) => count >= 2).length >= 2;
 }
@@ -74,6 +78,9 @@ export async function startConversationSession(req, res) {
         reused: true,
         session: existingSession,
         messages,
+        revealAvailable: canReveal(existingSession),
+        currentUserId: String(req.user._id),
+        sessionsLeft: Math.max(0, 7 - (me.conversationSessionsUsed || 0)),
       });
     }
 
@@ -116,12 +123,16 @@ export async function startConversationSession(req, res) {
     me.conversationSessionsUsed = (me.conversationSessionsUsed || 0) + 1;
     await me.save();
 
-    const messages = await Message.find({ session: session._id }).sort({ createdAt: 1 });
+    const messages = await Message.find({ session: session._id })
+      .populate('sender', 'firstName photos')
+      .sort({ createdAt: 1 });
 
     return res.status(201).json({
       reused: false,
       session,
       messages,
+      revealAvailable: canReveal(session),
+      currentUserId: String(req.user._id),
       sessionsLeft: Math.max(0, 7 - me.conversationSessionsUsed),
     });
   } catch (error) {
@@ -151,6 +162,7 @@ export async function getConversationSession(req, res) {
       session,
       messages,
       revealAvailable: canReveal(session),
+      currentUserId: String(req.user._id),
     });
   } catch (error) {
     console.error('getConversationSession error', error);
@@ -199,6 +211,7 @@ export async function sendConversationMessage(req, res) {
       message: populated,
       revealAvailable: canReveal(session),
       totalMessages: session.totalMessages,
+      currentUserId: String(req.user._id),
     });
   } catch (error) {
     console.error('sendConversationMessage error', error);
@@ -249,6 +262,7 @@ export async function requestReveal(req, res) {
         revealed: false,
         waiting: true,
         message: 'Reveal request sent.',
+        currentUserId: String(req.user._id),
       });
     }
 
@@ -257,13 +271,14 @@ export async function requestReveal(req, res) {
     session.status = 'revealed';
     await session.save();
 
-    const existingMatch = await Match.findOne({
+    let existingMatch = await Match.findOne({
       users: { $all: session.users, $size: 2 },
     });
 
     if (!existingMatch) {
-      await Match.create({
+      existingMatch = await Match.create({
         users: session.users,
+        lastMessageAt: new Date(),
       });
     }
 
@@ -278,6 +293,8 @@ export async function requestReveal(req, res) {
       revealed: true,
       waiting: false,
       message: 'Profiles revealed.',
+      matchId: existingMatch._id,
+      currentUserId: String(req.user._id),
     });
   } catch (error) {
     console.error('requestReveal error', error);
@@ -314,6 +331,7 @@ export async function skipPrompt(req, res) {
     return res.json({
       prompt: newPrompt,
       message: systemMessage,
+      currentUserId: String(req.user._id),
     });
   } catch (error) {
     console.error('skipPrompt error', error);
@@ -338,9 +356,12 @@ export async function trySomeoneElse(req, res) {
     session.status = 'ended';
     await session.save();
 
-    return res.json({ message: 'Conversation ended. Try someone else.' });
+    return res.json({
+      message: 'Conversation ended. Try someone else.',
+      currentUserId: String(req.user._id),
+    });
   } catch (error) {
     console.error('trySomeoneElse error', error);
     return res.status(500).json({ message: 'Could not end conversation.' });
   }
-}
+    }
