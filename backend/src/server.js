@@ -11,6 +11,7 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import conversationRoutes from './routes/conversationRoutes.js';
 import billingRoutes from './routes/billing.js';
 import paymentRoutes from '../routes/paymentRoutes.js';
 import Message from './models/Message.js';
@@ -54,6 +55,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/conversation', conversationRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/payments', paymentRoutes);
 
@@ -90,7 +92,8 @@ io.on('connection', (socket) => {
       const message = await Message.create({
         matchId,
         sender: socket.userId,
-        content: content.trim()
+        content: content.trim(),
+        type: 'text'
       });
 
       match.lastMessageAt = new Date();
