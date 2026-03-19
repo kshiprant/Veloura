@@ -2,13 +2,21 @@ import mongoose from 'mongoose';
 
 const conversationSessionSchema = new mongoose.Schema(
   {
-    users: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+    users: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+      ],
+      validate: {
+        validator: function (value) {
+          return Array.isArray(value) && value.length === 2;
+        },
+        message: 'Conversation session must have exactly 2 users.',
       },
-    ],
+    },
 
     prompt: {
       type: String,
@@ -62,6 +70,7 @@ const conversationSessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Indexes
 conversationSessionSchema.index({ users: 1 });
 conversationSessionSchema.index({ expiresAt: 1 });
 
