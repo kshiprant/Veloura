@@ -25,6 +25,14 @@ export default function AppShell({ children }) {
         </Link>
 
         <Link
+          to="/spark"
+          className={`nav-item ${location.pathname === '/spark' ? 'active' : ''}`}
+        >
+          <span className="nav-icon">⚡</span>
+          <span className="nav-label">Spark</span>
+        </Link>
+
+        <Link
           to="/matches"
           className={`nav-item ${location.pathname === '/matches' ? 'active' : ''}`}
         >
