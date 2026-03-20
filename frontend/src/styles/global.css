@@ -1508,3 +1508,10 @@ p { line-height: 1.6; }
 .nav-item.spark.active {
   background: transparent;
 }
+.dev-credit {
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 20px 0 90px;
+  opacity: 0.75;
+}
