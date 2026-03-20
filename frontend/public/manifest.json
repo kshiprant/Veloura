@@ -1,0 +1,20 @@
+{
+  "name": "Veloura",
+  "short_name": "Veloura",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f1f4",
+  "theme_color": "#b20f57",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
