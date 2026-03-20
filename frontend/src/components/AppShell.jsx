@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from 'react-router-dom';
 import InstallPrompt from '../components/InstallPrompt';
 import IosInstallPrompt from '../components/IosInstallPrompt';
@@ -7,7 +8,10 @@ export default function AppShell({ children }) {
 
   return (
     <div className="app-shell">
-      <main className="page-wrap">{children}</main>
+      <main className="page-wrap">
+        {children}
+        <div className="dev-credit">Developed by Kshiprant</div>
+      </main>
 
       {/* Install Prompts */}
       <InstallPrompt />
