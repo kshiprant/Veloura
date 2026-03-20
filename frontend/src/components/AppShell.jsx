@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import InstallPrompt from '../components/InstallPrompt';
 
 export default function AppShell({ children }) {
   const location = useLocation();
@@ -6,6 +7,9 @@ export default function AppShell({ children }) {
   return (
     <div className="app-shell">
       <main className="page-wrap">{children}</main>
+
+      {/* Install Prompt */}
+      <InstallPrompt />
 
       <nav className="bottom-nav">
         <Link
