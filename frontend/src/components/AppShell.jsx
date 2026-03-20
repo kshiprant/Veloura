@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import InstallPrompt from '../components/InstallPrompt';
+import IosInstallPrompt from '../components/IosInstallPrompt';
 
 export default function AppShell({ children }) {
   const location = useLocation();
@@ -8,8 +9,9 @@ export default function AppShell({ children }) {
     <div className="app-shell">
       <main className="page-wrap">{children}</main>
 
-      {/* Install Prompt */}
+      {/* Install Prompts */}
       <InstallPrompt />
+      <IosInstallPrompt />
 
       <nav className="bottom-nav">
         <Link
